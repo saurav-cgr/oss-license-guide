@@ -7,7 +7,7 @@ modules. This module only assembles routes and middleware.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from oss_license_guide.api import health_router
+from oss_license_guide.api import expressions_router, health_router
 from oss_license_guide.config.settings import Settings, get_settings
 
 
@@ -31,6 +31,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
 
     app.include_router(health_router, prefix=app_settings.api_prefix)
+    app.include_router(expressions_router, prefix=app_settings.api_prefix)
 
     return app
 
