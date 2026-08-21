@@ -139,16 +139,31 @@ Do not create empty architectural layers merely to match this tree. Add a direct
 
 ## Local and hosted execution
 
-The scaffold must eventually provide this portable container workflow:
+Verified scaffold commands (Milestone 0):
 
 ```bash
+# Full stack (web on :8080, api on :8000)
 docker compose up --build
-docker compose run --rm api pytest
-docker compose run --rm web npm test -- --run
+
+# Build images only
 docker compose build
+
+# Backend: install deps, run integration tests, lint
+cd backend
+uv sync --dev
+uv run pytest
+uv run ruff check src tests
+
+# Frontend: install deps, typecheck, test, lint, build
+cd frontend
+npm install
+npm run typecheck
+npm test
+npm run lint
+npm run build
 ```
 
-Until the scaffold exists, do not claim these commands were run. Once tooling is implemented, update this section to match the verified commands exactly.
+The API image is built without dev dependencies, so `pytest` and `ruff` run via `uv` on the host, not inside the container. The reference Compose deployment needs only `web` and `api`.
 
 Pin backend and frontend dependencies and use reproducible container builds. Production images must not contain development secrets or rely on bind-mounted source.
 

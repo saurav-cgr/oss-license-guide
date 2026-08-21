@@ -1,1 +1,26 @@
 /docs/plan/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Python
+.venv
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/
