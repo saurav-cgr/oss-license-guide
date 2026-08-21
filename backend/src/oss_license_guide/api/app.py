@@ -4,8 +4,10 @@ HTTP concerns live here; domain decisions stay in framework-independent
 modules. This module only assembles routes and middleware.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from oss_license_guide.api import (
     analyses_router,
@@ -33,6 +35,29 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_error_handler(
+        request: Request, exc: RequestValidationError
+    ) -> JSONResponse:
+        """Return a stable, secret-free error shape for invalid requests."""
+        details = [
+            {
+                "field": ".".join(str(part) for part in entry["loc"]),
+                "message": entry["msg"],
+            }
+            for entry in exc.errors()
+        ]
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "validation_error",
+                    "message": "Request validation failed",
+                    "details": details,
+                }
+            },
         )
 
     app.include_router(health_router, prefix=app_settings.api_prefix)

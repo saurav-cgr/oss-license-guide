@@ -3,11 +3,18 @@
 from typing import Any
 
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 from oss_license_guide.answering import build_answer, render
 from oss_license_guide.rules import evaluate, load_rules
-from oss_license_guide.scenarios.facts import FactType, Provenance
+from oss_license_guide.safety import MAX_EXPRESSION_LENGTH
+from oss_license_guide.scenarios.facts import (
+    Action,
+    DistributionForm,
+    FactType,
+    Provenance,
+    Recipient,
+)
 from oss_license_guide.scenarios.schema import Fact, Scenario
 from oss_license_guide.sources import load_catalog
 
@@ -25,10 +32,31 @@ class FactsModel(BaseModel):
     outbound_license: str | None = None
     selected_branch: str | None = None
 
+    @field_validator("action")
+    @classmethod
+    def _validate_action(cls, value: str | None) -> str | None:
+        return _validate_enum(value, Action)
+
+    @field_validator("distribution_form")
+    @classmethod
+    def _validate_form(cls, value: str | None) -> str | None:
+        return _validate_enum(value, DistributionForm)
+
+    @field_validator("recipient")
+    @classmethod
+    def _validate_recipient(cls, value: str | None) -> str | None:
+        return _validate_enum(value, Recipient)
+
 
 class AnalysisRequest(BaseModel):
-    expression: str
+    expression: str = Field(min_length=1, max_length=MAX_EXPRESSION_LENGTH)
     facts: FactsModel = FactsModel()
+
+
+def _validate_enum(value: str | None, enum_cls: type) -> str | None:
+    if value is not None and value not in {member.value for member in enum_cls}:
+        raise ValueError(f"invalid value: {value!r}")
+    return value
 
 
 class CitationOut(BaseModel):
