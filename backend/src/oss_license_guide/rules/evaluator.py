@@ -12,7 +12,7 @@ from enum import Enum
 
 from oss_license_guide.expressions.service import parse_expression
 from oss_license_guide.rules.eligibility import is_eligible
-from oss_license_guide.rules.schema import AnalysisOutcome, Rule
+from oss_license_guide.rules.schema import AnalysisOutcome, ObligationClaim, Rule
 from oss_license_guide.scenarios.facts import FactType
 from oss_license_guide.scenarios.missing import missing_facts
 from oss_license_guide.scenarios.schema import Scenario
@@ -24,7 +24,7 @@ class AnalysisResult:
 
     outcome: AnalysisOutcome
     canonical: str
-    obligations: list[str] = field(default_factory=list)
+    obligations: list[ObligationClaim] = field(default_factory=list)
     missing_facts: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     rule_id: str | None = None

@@ -20,8 +20,14 @@
       "scenario_preconditions": { "distribution": true, "distribution_form": "source", "modified": false },
       "outcome": "Permitted with listed obligations",
       "obligations": [
-        "Include the MIT license text",
-        "Retain the original copyright notice"
+        {
+          "text": "Include the MIT license text",
+          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 2 }]
+        },
+        {
+          "text": "Retain the original copyright notice",
+          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 3 }]
+        }
       ],
       "exceptions": [],
       "direction": "MIT component redistributed in source form, unmodified",
@@ -37,8 +43,14 @@
       "scenario_preconditions": { "distribution": true, "distribution_form": "binary", "modified": false },
       "outcome": "Permitted with listed obligations",
       "obligations": [
-        "Include the MIT license text in the distribution",
-        "Retain the original copyright notice"
+        {
+          "text": "Include the MIT license text in the distribution",
+          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 2 }]
+        },
+        {
+          "text": "Retain the original copyright notice",
+          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 3 }]
+        }
       ],
       "exceptions": [],
       "direction": "MIT component redistributed in binary form, unmodified",
@@ -54,9 +66,14 @@
       "scenario_preconditions": { "distribution": true, "distribution_form": "source", "modified": true },
       "outcome": "Permitted with listed obligations",
       "obligations": [
-        "Include the MIT license text",
-        "Retain the original copyright notice",
-        "Indicate that changes were made"
+        {
+          "text": "Include the MIT license text",
+          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 2 }]
+        },
+        {
+          "text": "Retain the original copyright notice",
+          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 3 }]
+        }
       ],
       "exceptions": [],
       "direction": "MIT component redistributed in source form, modified",
@@ -72,8 +89,14 @@
       "scenario_preconditions": { "distribution": true, "distribution_form": "binary", "modified": true },
       "outcome": "Permitted with listed obligations",
       "obligations": [
-        "Include the MIT license text in the distribution",
-        "Retain the original copyright notice"
+        {
+          "text": "Include the MIT license text in the distribution",
+          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 2 }]
+        },
+        {
+          "text": "Retain the original copyright notice",
+          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 3 }]
+        }
       ],
       "exceptions": [],
       "direction": "MIT component redistributed in binary form, modified",

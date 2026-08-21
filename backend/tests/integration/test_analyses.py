@@ -4,8 +4,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from oss_license_guide.api.app import create_app
+from oss_license_guide.citations import validate_claims
 from oss_license_guide.rules.eligibility import is_eligible
-from oss_license_guide.rules.schema import ReviewStatus, Rule
+from oss_license_guide.rules.schema import Citation, ObligationClaim, ReviewStatus, Rule
 
 
 @pytest.fixture
@@ -38,7 +39,8 @@ def test_mit_source_distribution_unmodified_has_obligations(client: TestClient) 
         },
     )
     assert body["outcome"] == "Permitted with listed obligations"
-    assert any("license text" in obligation for obligation in body["obligations"])
+    texts = [claim["text"] for claim in body["obligations"]]
+    assert any("license text" in text for text in texts)
 
 
 def test_apache_binary_distribution_modified_has_obligations(client: TestClient) -> None:
@@ -54,7 +56,36 @@ def test_apache_binary_distribution_modified_has_obligations(client: TestClient)
         },
     )
     assert body["outcome"] == "Permitted with listed obligations"
-    assert any("NOTICE" in obligation for obligation in body["obligations"])
+    texts = [claim["text"] for claim in body["obligations"]]
+    assert any("NOTICE" in text for text in texts)
+
+
+def test_evidence_is_included_with_hashes(client: TestClient) -> None:
+    body = analyze(
+        client,
+        "Apache-2.0",
+        {
+            "action": "redistribute",
+            "distribution": True,
+            "distribution_form": "binary",
+            "recipient": "customers",
+            "modified": True,
+        },
+    )
+    assert body["evidence"], "expected evidence entries"
+    for entry in body["evidence"]:
+        assert entry["source_id"].startswith("spdx:")
+        assert entry["hash"]
+
+
+def test_rendered_contract_includes_required_sections(client: TestClient) -> None:
+    body = analyze(client, "MIT", {"action": "use", "distribution": False})
+    rendered = body["rendered"]
+    assert "Outcome:" in rendered
+    assert "Short answer:" in rendered
+    assert "Obligations:" in rendered
+    assert "Disclaimer:" in rendered
+    assert "not legal advice" in body["disclaimer"]
 
 
 def test_missing_facts_return_insufficient_information(client: TestClient) -> None:
@@ -91,6 +122,17 @@ def test_or_expression_with_selected_branch_evaluates_that_branch(client: TestCl
 def test_invalid_expression_abstains(client: TestClient) -> None:
     body = analyze(client, "MIT OR", {"action": "use", "distribution": False})
     assert body["outcome"] == "Insufficient information"
+
+
+def test_invalid_span_blocks_answer() -> None:
+    claim = ObligationClaim(
+        text="A claim with a bad span",
+        citations=[Citation(source_id="spdx:MIT@3.24.0", span_index=999)],
+    )
+    from oss_license_guide.sources import load_catalog
+
+    errors = validate_claims([claim], load_catalog())
+    assert errors
 
 
 def test_ineligible_rule_cannot_support_conclusion() -> None:

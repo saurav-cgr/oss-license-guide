@@ -33,6 +33,22 @@ class AnalysisOutcome(StrEnum):
 
 
 @dataclass(frozen=True)
+class Citation:
+    """A reference to one exact source span."""
+
+    source_id: str
+    span_index: int
+
+
+@dataclass(frozen=True)
+class ObligationClaim:
+    """A material obligation claim linked to supporting source spans."""
+
+    text: str
+    citations: list[Citation] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
 class Rule:
     """A single versioned rule record."""
 
@@ -40,7 +56,7 @@ class Rule:
     license_expression_pattern: str
     scenario_preconditions: dict[str, Any] = field(default_factory=dict)
     outcome: str = ""
-    obligations: list[str] = field(default_factory=list)
+    obligations: list[ObligationClaim] = field(default_factory=list)
     exceptions: list[str] = field(default_factory=list)
     direction: str = ""
     source_ids: list[str] = field(default_factory=list)

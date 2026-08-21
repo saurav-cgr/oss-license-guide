@@ -20,9 +20,18 @@
       "scenario_preconditions": { "distribution": true, "distribution_form": "source", "modified": false },
       "outcome": "Permitted with listed obligations",
       "obligations": [
-        "Provide a copy of the Apache-2.0 license",
-        "Include the NOTICE file if one is present",
-        "Retain any copyright, patent, trademark, and attribution notices"
+        {
+          "text": "Provide a copy of the Apache-2.0 license",
+          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 }]
+        },
+        {
+          "text": "Include the NOTICE file if one is present",
+          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 }]
+        },
+        {
+          "text": "Retain any copyright, patent, trademark, and attribution notices",
+          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }]
+        }
       ],
       "exceptions": [],
       "direction": "Apache-2.0 component redistributed in source form, unmodified",
@@ -38,9 +47,18 @@
       "scenario_preconditions": { "distribution": true, "distribution_form": "binary", "modified": false },
       "outcome": "Permitted with listed obligations",
       "obligations": [
-        "Provide a copy of the Apache-2.0 license in the distribution",
-        "Include the NOTICE file if one is present",
-        "Retain any copyright, patent, trademark, and attribution notices"
+        {
+          "text": "Provide a copy of the Apache-2.0 license in the distribution",
+          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 }]
+        },
+        {
+          "text": "Include the NOTICE file if one is present",
+          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 }]
+        },
+        {
+          "text": "Retain any copyright, patent, trademark, and attribution notices",
+          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }]
+        }
       ],
       "exceptions": [],
       "direction": "Apache-2.0 component redistributed in binary form, unmodified",
@@ -56,10 +74,22 @@
       "scenario_preconditions": { "distribution": true, "distribution_form": "source", "modified": true },
       "outcome": "Permitted with listed obligations",
       "obligations": [
-        "Provide a copy of the Apache-2.0 license",
-        "Include the NOTICE file if one is present",
-        "Retain and clearly mark any modified files",
-        "Retain any copyright, patent, trademark, and attribution notices"
+        {
+          "text": "Provide a copy of the Apache-2.0 license",
+          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 }]
+        },
+        {
+          "text": "Include the NOTICE file if one is present",
+          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 }]
+        },
+        {
+          "text": "Retain and clearly mark any modified files",
+          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 17 }]
+        },
+        {
+          "text": "Retain any copyright, patent, trademark, and attribution notices",
+          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }]
+        }
       ],
       "exceptions": [],
       "direction": "Apache-2.0 component redistributed in source form, modified",
@@ -75,9 +105,18 @@
       "scenario_preconditions": { "distribution": true, "distribution_form": "binary", "modified": true },
       "outcome": "Permitted with listed obligations",
       "obligations": [
-        "Provide a copy of the Apache-2.0 license in the distribution",
-        "Include the NOTICE file if one is present",
-        "Retain any copyright, patent, trademark, and attribution notices"
+        {
+          "text": "Provide a copy of the Apache-2.0 license in the distribution",
+          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 }]
+        },
+        {
+          "text": "Include the NOTICE file if one is present",
+          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 }]
+        },
+        {
+          "text": "Retain any copyright, patent, trademark, and attribution notices",
+          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }]
+        }
       ],
       "exceptions": [],
       "direction": "Apache-2.0 component redistributed in binary form, modified",

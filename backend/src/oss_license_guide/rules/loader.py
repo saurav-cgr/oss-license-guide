@@ -6,7 +6,7 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
-from oss_license_guide.rules.schema import ReviewStatus, Rule
+from oss_license_guide.rules.schema import Citation, ObligationClaim, ReviewStatus, Rule
 
 _PACKAGE_ROOT = Path(__file__).resolve().parents[3]
 _RULES_DIR = _PACKAGE_ROOT / "data" / "rules"
@@ -36,7 +36,7 @@ def _rule_from_dict(entry: dict) -> Rule:
         license_expression_pattern=entry["license_expression_pattern"],
         scenario_preconditions=entry.get("scenario_preconditions", {}),
         outcome=entry.get("outcome", ""),
-        obligations=entry.get("obligations", []),
+        obligations=_obligations_from_dict(entry.get("obligations", [])),
         exceptions=entry.get("exceptions", []),
         direction=entry.get("direction", ""),
         source_ids=entry.get("source_ids", []),
@@ -45,3 +45,17 @@ def _rule_from_dict(entry: dict) -> Rule:
         effective_date=entry.get("effective_date", ""),
         last_verified_at=entry.get("last_verified_at", ""),
     )
+
+
+def _obligations_from_dict(items: list[dict]) -> list[ObligationClaim]:
+    claims: list[ObligationClaim] = []
+    for item in items:
+        if isinstance(item, str):
+            claims.append(ObligationClaim(text=item))
+            continue
+        citations = [
+            Citation(source_id=cite["source_id"], span_index=cite["span_index"])
+            for cite in item.get("citations", [])
+        ]
+        claims.append(ObligationClaim(text=item["text"], citations=citations))
+    return claims
