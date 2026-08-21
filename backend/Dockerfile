@@ -25,6 +25,9 @@ RUN useradd --create-home --uid 10001 appuser
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/src /app/src
 
+# Bundled SPDX catalog and sources (immutable, versioned data).
+COPY data /app/data
+
 USER appuser
 
 EXPOSE 8000

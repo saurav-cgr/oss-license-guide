@@ -1,0 +1,22 @@
+{
+  "version": "3.24.0",
+  "source": "https://github.com/spdx/license-list-data/releases/tag/v3.24.0",
+  "retrieved_at": "2026-08-21T14:47:43.928205+00:00",
+  "raw_hashes": {
+    "licenses.json": "2455d63fb9bcc1eef49bad9fe5bd78e3dd3c2e71c31999f403fe738cdc67cae2",
+    "exceptions.json": "f779511110a5eb9ffbd6a11abcec3b224e8eb623f6465e87254e95427b01f1b3",
+    "details/AGPL-3.0-only.json": "aab7d2e87f33c1cf22358fb7b5bf465d3c991093dca3800e101f91148321901f",
+    "details/Apache-2.0.json": "6166cbabfb8b0eb73811e28251db5100119b01e2e23c72a0bb7a27796f95f8f0",
+    "details/BSD-2-Clause.json": "4540e74685dcc97dfd129d0bee624c3470790dd5f352cae9c0c2c6d09d6d3c91",
+    "details/BSD-3-Clause.json": "029ba0bd0df3507277128fae7dfdb5d1cf48fcf07eb7cf2e86c4d197b996be6d",
+    "details/EPL-2.0.json": "aa658877e558fb95c0dd33d72e31c8b766c23845c82062535d36b50829beee07",
+    "details/GPL-2.0-only.json": "22bd4b985bbb0a0b6174e9bb16b9726502c1578d652c836e3199226bc540713b",
+    "details/GPL-2.0.json": "70f59570125bef2a17f2a7706d2f2e6e5991bd75a5796553b0e429ef20fa3608",
+    "details/GPL-3.0-only.json": "bd528747914a9fb1fcd4e42e80d36a57388956485f3143ef08ce5328cee91f5b",
+    "details/ISC.json": "b910fe72f50009f9ad8464262ed1322f61d38c03858a92efea9f25a415e7f1c8",
+    "details/LGPL-2.1-only.json": "fcecd59bdff9a6645b7e78c3b5fd9f9e2a72296b47bcc89c3236087e61629f0a",
+    "details/LGPL-3.0-only.json": "bb5edd826fd9ff700b926c975737947a12d4058b4e8385afa8bf61f02f9c5b30",
+    "details/MIT.json": "9655c161ec5f85c0a36486a7a7bb99f00894e188e34d9ebc98c904f9b8c2ba3d",
+    "details/MPL-2.0.json": "4e1051487b7f74e9f196f451ccbb38a4ece17fb80d5d648f7bad201367f79ca9"
+  }
+}
