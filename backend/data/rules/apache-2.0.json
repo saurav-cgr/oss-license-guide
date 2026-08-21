@@ -1,0 +1,91 @@
+{
+  "rules": [
+    {
+      "rule_id": "apache-internal-use",
+      "license_expression_pattern": "Apache-2.0",
+      "scenario_preconditions": { "distribution": false },
+      "outcome": "Likely permitted under stated assumptions",
+      "obligations": [],
+      "exceptions": [],
+      "direction": "Apache-2.0 component used internally without external distribution",
+      "source_ids": ["spdx:Apache-2.0@3.24.0"],
+      "review_status": "maintainer_reviewed",
+      "reviewer": "maintainer",
+      "effective_date": "2026-08-21",
+      "last_verified_at": "2026-08-21"
+    },
+    {
+      "rule_id": "apache-distribute-source-unmodified",
+      "license_expression_pattern": "Apache-2.0",
+      "scenario_preconditions": { "distribution": true, "distribution_form": "source", "modified": false },
+      "outcome": "Permitted with listed obligations",
+      "obligations": [
+        "Provide a copy of the Apache-2.0 license",
+        "Include the NOTICE file if one is present",
+        "Retain any copyright, patent, trademark, and attribution notices"
+      ],
+      "exceptions": [],
+      "direction": "Apache-2.0 component redistributed in source form, unmodified",
+      "source_ids": ["spdx:Apache-2.0@3.24.0"],
+      "review_status": "maintainer_reviewed",
+      "reviewer": "maintainer",
+      "effective_date": "2026-08-21",
+      "last_verified_at": "2026-08-21"
+    },
+    {
+      "rule_id": "apache-distribute-binary-unmodified",
+      "license_expression_pattern": "Apache-2.0",
+      "scenario_preconditions": { "distribution": true, "distribution_form": "binary", "modified": false },
+      "outcome": "Permitted with listed obligations",
+      "obligations": [
+        "Provide a copy of the Apache-2.0 license in the distribution",
+        "Include the NOTICE file if one is present",
+        "Retain any copyright, patent, trademark, and attribution notices"
+      ],
+      "exceptions": [],
+      "direction": "Apache-2.0 component redistributed in binary form, unmodified",
+      "source_ids": ["spdx:Apache-2.0@3.24.0"],
+      "review_status": "maintainer_reviewed",
+      "reviewer": "maintainer",
+      "effective_date": "2026-08-21",
+      "last_verified_at": "2026-08-21"
+    },
+    {
+      "rule_id": "apache-distribute-source-modified",
+      "license_expression_pattern": "Apache-2.0",
+      "scenario_preconditions": { "distribution": true, "distribution_form": "source", "modified": true },
+      "outcome": "Permitted with listed obligations",
+      "obligations": [
+        "Provide a copy of the Apache-2.0 license",
+        "Include the NOTICE file if one is present",
+        "Retain and clearly mark any modified files",
+        "Retain any copyright, patent, trademark, and attribution notices"
+      ],
+      "exceptions": [],
+      "direction": "Apache-2.0 component redistributed in source form, modified",
+      "source_ids": ["spdx:Apache-2.0@3.24.0"],
+      "review_status": "maintainer_reviewed",
+      "reviewer": "maintainer",
+      "effective_date": "2026-08-21",
+      "last_verified_at": "2026-08-21"
+    },
+    {
+      "rule_id": "apache-distribute-binary-modified",
+      "license_expression_pattern": "Apache-2.0",
+      "scenario_preconditions": { "distribution": true, "distribution_form": "binary", "modified": true },
+      "outcome": "Permitted with listed obligations",
+      "obligations": [
+        "Provide a copy of the Apache-2.0 license in the distribution",
+        "Include the NOTICE file if one is present",
+        "Retain any copyright, patent, trademark, and attribution notices"
+      ],
+      "exceptions": [],
+      "direction": "Apache-2.0 component redistributed in binary form, modified",
+      "source_ids": ["spdx:Apache-2.0@3.24.0"],
+      "review_status": "maintainer_reviewed",
+      "reviewer": "maintainer",
+      "effective_date": "2026-08-21",
+      "last_verified_at": "2026-08-21"
+    }
+  ]
+}

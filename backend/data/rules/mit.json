@@ -1,0 +1,87 @@
+{
+  "rules": [
+    {
+      "rule_id": "mit-internal-use",
+      "license_expression_pattern": "MIT",
+      "scenario_preconditions": { "distribution": false },
+      "outcome": "Likely permitted under stated assumptions",
+      "obligations": [],
+      "exceptions": [],
+      "direction": "MIT component used internally without external distribution",
+      "source_ids": ["spdx:MIT@3.24.0"],
+      "review_status": "maintainer_reviewed",
+      "reviewer": "maintainer",
+      "effective_date": "2026-08-21",
+      "last_verified_at": "2026-08-21"
+    },
+    {
+      "rule_id": "mit-distribute-source-unmodified",
+      "license_expression_pattern": "MIT",
+      "scenario_preconditions": { "distribution": true, "distribution_form": "source", "modified": false },
+      "outcome": "Permitted with listed obligations",
+      "obligations": [
+        "Include the MIT license text",
+        "Retain the original copyright notice"
+      ],
+      "exceptions": [],
+      "direction": "MIT component redistributed in source form, unmodified",
+      "source_ids": ["spdx:MIT@3.24.0"],
+      "review_status": "maintainer_reviewed",
+      "reviewer": "maintainer",
+      "effective_date": "2026-08-21",
+      "last_verified_at": "2026-08-21"
+    },
+    {
+      "rule_id": "mit-distribute-binary-unmodified",
+      "license_expression_pattern": "MIT",
+      "scenario_preconditions": { "distribution": true, "distribution_form": "binary", "modified": false },
+      "outcome": "Permitted with listed obligations",
+      "obligations": [
+        "Include the MIT license text in the distribution",
+        "Retain the original copyright notice"
+      ],
+      "exceptions": [],
+      "direction": "MIT component redistributed in binary form, unmodified",
+      "source_ids": ["spdx:MIT@3.24.0"],
+      "review_status": "maintainer_reviewed",
+      "reviewer": "maintainer",
+      "effective_date": "2026-08-21",
+      "last_verified_at": "2026-08-21"
+    },
+    {
+      "rule_id": "mit-distribute-source-modified",
+      "license_expression_pattern": "MIT",
+      "scenario_preconditions": { "distribution": true, "distribution_form": "source", "modified": true },
+      "outcome": "Permitted with listed obligations",
+      "obligations": [
+        "Include the MIT license text",
+        "Retain the original copyright notice",
+        "Indicate that changes were made"
+      ],
+      "exceptions": [],
+      "direction": "MIT component redistributed in source form, modified",
+      "source_ids": ["spdx:MIT@3.24.0"],
+      "review_status": "maintainer_reviewed",
+      "reviewer": "maintainer",
+      "effective_date": "2026-08-21",
+      "last_verified_at": "2026-08-21"
+    },
+    {
+      "rule_id": "mit-distribute-binary-modified",
+      "license_expression_pattern": "MIT",
+      "scenario_preconditions": { "distribution": true, "distribution_form": "binary", "modified": true },
+      "outcome": "Permitted with listed obligations",
+      "obligations": [
+        "Include the MIT license text in the distribution",
+        "Retain the original copyright notice"
+      ],
+      "exceptions": [],
+      "direction": "MIT component redistributed in binary form, modified",
+      "source_ids": ["spdx:MIT@3.24.0"],
+      "review_status": "maintainer_reviewed",
+      "reviewer": "maintainer",
+      "effective_date": "2026-08-21",
+      "last_verified_at": "2026-08-21"
+    }
+  ]
+}
