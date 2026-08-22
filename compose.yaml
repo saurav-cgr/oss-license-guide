@@ -4,8 +4,10 @@ services:
       context: ./backend
     environment:
       OLG_CORS_ORIGINS: ${OLG_CORS_ORIGINS:-}
-    ports:
-      - "8000:8000"
+    # The API is reachable only within the compose network through the web
+    # reverse proxy. No port is published to the host.
+    expose:
+      - "8000"
     healthcheck:
       test:
         [
@@ -22,8 +24,9 @@ services:
   web:
     build:
       context: ./frontend
+    # The web container is the only publicly exposed endpoint.
     ports:
-      - "8080:80"
+      - "8080:8080"
     depends_on:
       api:
         condition: service_healthy
