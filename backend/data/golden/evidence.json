@@ -1,0 +1,83 @@
+{
+  "cases": [
+    {
+      "case_id": "evidence-mit-source-001",
+      "category": "conflicting_or_missing_evidence",
+      "description": "MIT source redistribution must carry the license-text and notice spans in evidence.",
+      "request": {
+        "expression": "MIT",
+        "facts": {
+          "action": "redistribute",
+          "distribution": true,
+          "distribution_form": "source",
+          "recipient": "public",
+          "modified": false
+        }
+      },
+      "expect": {
+        "outcome": "Permitted with listed obligations",
+        "must_abstain": false,
+        "required_citations": [
+          { "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
+          { "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+        ]
+      }
+    },
+    {
+      "case_id": "evidence-apache-source-modified-002",
+      "category": "conflicting_or_missing_evidence",
+      "description": "Apache modified source redistribution must cite the modified-files span in evidence.",
+      "request": {
+        "expression": "Apache-2.0",
+        "facts": {
+          "action": "redistribute",
+          "distribution": true,
+          "distribution_form": "source",
+          "recipient": "public",
+          "modified": true
+        }
+      },
+      "expect": {
+        "outcome": "Permitted with listed obligations",
+        "must_abstain": false,
+        "required_citations": [
+          { "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
+          { "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 17 },
+          { "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
+          { "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+        ]
+      }
+    },
+    {
+      "case_id": "evidence-mit-internal-no-claims-003",
+      "category": "conflicting_or_missing_evidence",
+      "description": "Internal use emits no obligations and no fabricated evidence.",
+      "request": {
+        "expression": "MIT",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": {
+        "outcome": "Likely permitted under stated assumptions",
+        "must_abstain": false,
+        "no_obligations": true,
+        "no_evidence": true
+      }
+    },
+    {
+      "case_id": "evidence-missing-facts-no-claims-004",
+      "category": "conflicting_or_missing_evidence",
+      "description": "An abstention for missing facts emits no fabricated obligations or evidence.",
+      "request": {
+        "expression": "MIT",
+        "facts": { "action": "use" }
+      },
+      "expect": {
+        "outcome": "Insufficient information",
+        "must_abstain": true,
+        "required_missing_facts": ["distribution"],
+        "no_obligations": true,
+        "no_evidence": true
+      }
+    }
+  ]
+}

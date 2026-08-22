@@ -1,0 +1,214 @@
+{
+  "cases": [
+    {
+      "case_id": "mit-internal-use-001",
+      "category": "mit_supported",
+      "description": "MIT component used internally, no distribution outside the organization.",
+      "request": {
+        "expression": "MIT",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": {
+        "outcome": "Likely permitted under stated assumptions",
+        "must_abstain": false
+      }
+    },
+    {
+      "case_id": "mit-internal-modify-002",
+      "category": "mit_supported",
+      "description": "MIT component modified but never distributed.",
+      "request": {
+        "expression": "MIT",
+        "facts": { "action": "modify", "distribution": false }
+      },
+      "expect": {
+        "outcome": "Likely permitted under stated assumptions",
+        "must_abstain": false
+      }
+    },
+    {
+      "case_id": "mit-source-unmodified-public-003",
+      "category": "mit_supported",
+      "description": "Unmodified MIT dependency redistributed in source form to the public.",
+      "request": {
+        "expression": "MIT",
+        "facts": {
+          "action": "redistribute",
+          "distribution": true,
+          "distribution_form": "source",
+          "recipient": "public",
+          "modified": false
+        }
+      },
+      "expect": {
+        "outcome": "Permitted with listed obligations",
+        "must_abstain": false,
+        "expected_claims": [
+          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
+          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+        ]
+      }
+    },
+    {
+      "case_id": "mit-source-unmodified-employees-004",
+      "category": "mit_supported",
+      "description": "Unmodified MIT dependency redistributed in source form to employees.",
+      "request": {
+        "expression": "MIT",
+        "facts": {
+          "action": "redistribute",
+          "distribution": true,
+          "distribution_form": "source",
+          "recipient": "employees",
+          "modified": false
+        }
+      },
+      "expect": {
+        "outcome": "Permitted with listed obligations",
+        "must_abstain": false,
+        "expected_claims": [
+          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
+          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+        ]
+      }
+    },
+    {
+      "case_id": "mit-binary-unmodified-customers-005",
+      "category": "mit_supported",
+      "description": "Unmodified MIT dependency redistributed in binary form to customers.",
+      "request": {
+        "expression": "MIT",
+        "facts": {
+          "action": "redistribute",
+          "distribution": true,
+          "distribution_form": "binary",
+          "recipient": "customers",
+          "modified": false
+        }
+      },
+      "expect": {
+        "outcome": "Permitted with listed obligations",
+        "must_abstain": false,
+        "expected_claims": [
+          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
+          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+        ]
+      }
+    },
+    {
+      "case_id": "mit-binary-unmodified-contractors-006",
+      "category": "mit_supported",
+      "description": "Unmodified MIT dependency redistributed in binary form to contractors.",
+      "request": {
+        "expression": "MIT",
+        "facts": {
+          "action": "redistribute",
+          "distribution": true,
+          "distribution_form": "binary",
+          "recipient": "contractors",
+          "modified": false
+        }
+      },
+      "expect": {
+        "outcome": "Permitted with listed obligations",
+        "must_abstain": false,
+        "expected_claims": [
+          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
+          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+        ]
+      }
+    },
+    {
+      "case_id": "mit-source-modified-public-007",
+      "category": "mit_supported",
+      "description": "Modified MIT dependency redistributed in source form to the public.",
+      "request": {
+        "expression": "MIT",
+        "facts": {
+          "action": "redistribute",
+          "distribution": true,
+          "distribution_form": "source",
+          "recipient": "public",
+          "modified": true
+        }
+      },
+      "expect": {
+        "outcome": "Permitted with listed obligations",
+        "must_abstain": false,
+        "expected_claims": [
+          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
+          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+        ]
+      }
+    },
+    {
+      "case_id": "mit-source-modified-customers-008",
+      "category": "mit_supported",
+      "description": "Modified MIT dependency redistributed in source form to customers.",
+      "request": {
+        "expression": "MIT",
+        "facts": {
+          "action": "redistribute",
+          "distribution": true,
+          "distribution_form": "source",
+          "recipient": "customers",
+          "modified": true
+        }
+      },
+      "expect": {
+        "outcome": "Permitted with listed obligations",
+        "must_abstain": false,
+        "expected_claims": [
+          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
+          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+        ]
+      }
+    },
+    {
+      "case_id": "mit-binary-modified-public-009",
+      "category": "mit_supported",
+      "description": "Modified MIT dependency redistributed in binary form to the public.",
+      "request": {
+        "expression": "MIT",
+        "facts": {
+          "action": "redistribute",
+          "distribution": true,
+          "distribution_form": "binary",
+          "recipient": "public",
+          "modified": true
+        }
+      },
+      "expect": {
+        "outcome": "Permitted with listed obligations",
+        "must_abstain": false,
+        "expected_claims": [
+          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
+          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+        ]
+      }
+    },
+    {
+      "case_id": "mit-binary-modified-contractors-010",
+      "category": "mit_supported",
+      "description": "Modified MIT dependency redistributed in binary form to contractors.",
+      "request": {
+        "expression": "MIT",
+        "facts": {
+          "action": "redistribute",
+          "distribution": true,
+          "distribution_form": "binary",
+          "recipient": "contractors",
+          "modified": true
+        }
+      },
+      "expect": {
+        "outcome": "Permitted with listed obligations",
+        "must_abstain": false,
+        "expected_claims": [
+          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
+          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+        ]
+      }
+    }
+  ]
+}

@@ -2,10 +2,12 @@
 
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Header
 from pydantic import BaseModel, Field, field_validator
 
-from oss_license_guide.answering import build_answer, render
+from oss_license_guide.answering import Answer, build_answer, render
+from oss_license_guide.config.settings import get_settings
+from oss_license_guide.providers import ExplanationFindings, generate_explanation
 from oss_license_guide.rules import evaluate, load_rules
 from oss_license_guide.safety import MAX_EXPRESSION_LENGTH
 from oss_license_guide.scenarios.facts import (
@@ -51,6 +53,8 @@ class FactsModel(BaseModel):
 class AnalysisRequest(BaseModel):
     expression: str = Field(min_length=1, max_length=MAX_EXPRESSION_LENGTH)
     facts: FactsModel = FactsModel()
+    provider: str | None = None
+    model: str | None = None
 
 
 def _validate_enum(value: str | None, enum_cls: type) -> str | None:
@@ -88,6 +92,10 @@ class AnalysisResponse(BaseModel):
     citation_errors: list[str] = []
     blocked: bool = False
     rendered: str = ""
+    explanation: str = ""
+    provider: str | None = None
+    model: str | None = None
+    provider_note: str = ""
 
 
 def _build_scenario(request: AnalysisRequest) -> Scenario:
@@ -100,11 +108,16 @@ def _build_scenario(request: AnalysisRequest) -> Scenario:
 
 
 @router.post("", response_model=AnalysisResponse)
-def analyze(request: AnalysisRequest) -> AnalysisResponse:
-    """Run the deterministic scenario-analysis workflow."""
+def analyze(
+    request: AnalysisRequest,
+    x_model_key: str | None = Header(default=None),
+) -> AnalysisResponse:
+    """Run the bounded scenario-analysis workflow with an optional explanation."""
     scenario = _build_scenario(request)
     result = evaluate(scenario, load_rules())
     answer = build_answer(result, scenario, load_catalog())
+
+    explanation, provider_note = _explain(request, x_model_key, answer)
 
     obligations = [] if answer.blocked else [_claim_out(claim) for claim in answer.obligations]
     evidence = [] if answer.blocked else [_citation_out(c) for c in answer.evidence]
@@ -126,6 +139,50 @@ def analyze(request: AnalysisRequest) -> AnalysisResponse:
         citation_errors=answer.citation_errors,
         blocked=answer.blocked,
         rendered=render(answer),
+        explanation=explanation,
+        provider=request.provider,
+        model=request.model or "",
+        provider_note=provider_note,
+    )
+
+
+def _explain(request: AnalysisRequest, x_model_key: str | None, answer: Answer) -> tuple[str, str]:
+    """Generate a bounded model explanation, degrading safely to deterministic."""
+    if not request.provider or answer.blocked:
+        return "", ""
+    result = generate_explanation(
+        provider=request.provider,
+        model=request.model or "",
+        api_key=x_model_key,
+        findings=_findings(answer),
+        settings=get_settings(),
+    )
+    return result.explanation, result.note
+
+
+def _findings(answer: Answer) -> ExplanationFindings:
+    """Build non-secret model findings from the deterministic answer."""
+    return ExplanationFindings(
+        outcome=answer.outcome,
+        canonical=answer.canonical,
+        short_answer=answer.short_answer,
+        assumptions=list(answer.assumptions),
+        obligations=[
+            {
+                "text": claim.text,
+                "citations": [
+                    {
+                        "source_id": citation.source_id,
+                        "span_index": citation.span_index,
+                        "text": citation.text,
+                    }
+                    for citation in claim.citations
+                ],
+            }
+            for claim in answer.obligations
+        ],
+        what_could_change=list(answer.what_could_change),
+        escalation=answer.escalation,
     )
 
 

@@ -14,6 +14,7 @@ from oss_license_guide.api import (
     expressions_router,
     health_router,
     licenses_router,
+    providers_router,
 )
 from oss_license_guide.config.settings import Settings, get_settings
 
@@ -63,6 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health_router, prefix=app_settings.api_prefix)
     app.include_router(expressions_router, prefix=app_settings.api_prefix)
     app.include_router(licenses_router, prefix=app_settings.api_prefix)
+    app.include_router(providers_router, prefix=app_settings.api_prefix)
     app.include_router(analyses_router, prefix=app_settings.api_prefix)
 
     return app

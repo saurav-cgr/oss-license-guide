@@ -45,6 +45,10 @@ const SAMPLE: AnalysisResponse = {
   citation_errors: [],
   blocked: false,
   rendered: "rendered fallback text",
+  explanation: "",
+  provider: null,
+  model: null,
+  provider_note: "",
 };
 
 function okJson(body: unknown, status = 200) {
@@ -231,6 +235,24 @@ describe("analysis experience", () => {
     expect(headers["X-Model-Key"]).toBe("sk-secret-123");
     expect(window.localStorage.length).toBe(0);
     expect(window.sessionStorage.length).toBe(0);
+  });
+
+  it("renders a model explanation and provider note when present", async () => {
+    const withExplanation: AnalysisResponse = {
+      ...SAMPLE,
+      explanation: "The license permits use with attribution.",
+      provider: "gemini",
+      model: "gemini-2.0-flash",
+      provider_note: "Model explanation unavailable; deterministic result shown.",
+    };
+    vi.stubGlobal("fetch", stubFetch({ analyses: () => okJson(withExplanation) }));
+    render(<App />);
+
+    submitAnalysis();
+
+    expect(await screen.findByText("Model explanation")).toBeInTheDocument();
+    expect(screen.getByText("The license permits use with attribution.")).toBeInTheDocument();
+    expect(screen.getByRole("note")).toHaveTextContent(/deterministic result shown/);
   });
 
   it("shows the deterministic fallback result even when a model provider is selected", async () => {

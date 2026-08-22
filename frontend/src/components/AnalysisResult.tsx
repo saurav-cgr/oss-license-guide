@@ -142,6 +142,17 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
       )}
 
       <ListSection title="Assumptions" items={result.assumptions} />
+      {result.explanation && (
+        <section className="result-section explanation">
+          <h3>Model explanation</h3>
+          <p>{result.explanation}</p>
+        </section>
+      )}
+      {result.provider_note && (
+        <div role="note" className="provider-note">
+          {result.provider_note}
+        </div>
+      )}
       <ObligationsList obligations={result.obligations} />
       <ListSection title="What could change this" items={result.what_could_change} />
       <Evidence evidence={result.evidence} />

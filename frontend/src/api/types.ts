@@ -49,6 +49,10 @@ export interface AnalysisResponse {
   citation_errors: string[];
   blocked: boolean;
   rendered: string;
+  explanation: string;
+  provider: string | null;
+  model: string | null;
+  provider_note: string;
 }
 
 /** Stable error payload shape returned by the API error handlers. */

@@ -1,0 +1,64 @@
+{
+  "cases": [
+    {
+      "case_id": "unsupported-gpl3-001",
+      "category": "unsupported",
+      "description": "GPL-3.0-only is parsed but has no reviewed rules: must escalate.",
+      "request": {
+        "expression": "GPL-3.0-only",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": { "outcome": "Requires legal review", "must_abstain": true }
+    },
+    {
+      "case_id": "unsupported-bsd3-002",
+      "category": "unsupported",
+      "description": "BSD-3-Clause is parsed but outside MVP rule coverage.",
+      "request": {
+        "expression": "BSD-3-Clause",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": { "outcome": "Requires legal review", "must_abstain": true }
+    },
+    {
+      "case_id": "unsupported-isc-003",
+      "category": "unsupported",
+      "description": "ISC is parsed but outside MVP rule coverage.",
+      "request": {
+        "expression": "ISC",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": { "outcome": "Requires legal review", "must_abstain": true }
+    },
+    {
+      "case_id": "unsupported-epl2-004",
+      "category": "unsupported",
+      "description": "EPL-2.0 is parsed but outside MVP rule coverage.",
+      "request": {
+        "expression": "EPL-2.0",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": { "outcome": "Requires legal review", "must_abstain": true }
+    },
+    {
+      "case_id": "unsupported-licenseref-005",
+      "category": "unsupported",
+      "description": "A custom LicenseRef identifier must not be treated as permission.",
+      "request": {
+        "expression": "LicenseRef-Proprietary",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": { "outcome": "Requires legal review", "must_abstain": true }
+    },
+    {
+      "case_id": "unsupported-with-006",
+      "category": "unsupported",
+      "description": "A WITH exception is parsed but not substantively evaluated: must escalate.",
+      "request": {
+        "expression": "GPL-2.0-only WITH Classpath-exception-2.0",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": { "outcome": "Requires legal review", "must_abstain": true }
+    }
+  ]
+}

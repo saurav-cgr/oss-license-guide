@@ -1,0 +1,133 @@
+{
+  "cases": [
+    {
+      "case_id": "missing-no-facts-001",
+      "category": "missing_facts",
+      "description": "No scenario facts provided: must ask for action and distribution.",
+      "request": {
+        "expression": "MIT",
+        "facts": {}
+      },
+      "expect": {
+        "outcome": "Insufficient information",
+        "must_abstain": true,
+        "required_missing_facts": ["action", "distribution"]
+      }
+    },
+    {
+      "case_id": "missing-distribution-002",
+      "category": "missing_facts",
+      "description": "Action provided but distribution is unknown.",
+      "request": {
+        "expression": "MIT",
+        "facts": { "action": "use" }
+      },
+      "expect": {
+        "outcome": "Insufficient information",
+        "must_abstain": true,
+        "required_missing_facts": ["distribution"]
+      }
+    },
+    {
+      "case_id": "missing-distribution-details-003",
+      "category": "missing_facts",
+      "description": "Distribution occurs but form, recipient, and modification are unknown.",
+      "request": {
+        "expression": "MIT",
+        "facts": { "action": "redistribute", "distribution": true }
+      },
+      "expect": {
+        "outcome": "Insufficient information",
+        "must_abstain": true,
+        "required_missing_facts": ["distribution_form", "recipient", "modified"]
+      }
+    },
+    {
+      "case_id": "missing-modified-004",
+      "category": "missing_facts",
+      "description": "Distribution details except modification are provided.",
+      "request": {
+        "expression": "MIT",
+        "facts": {
+          "action": "redistribute",
+          "distribution": true,
+          "distribution_form": "source",
+          "recipient": "public"
+        }
+      },
+      "expect": {
+        "outcome": "Insufficient information",
+        "must_abstain": true,
+        "required_missing_facts": ["modified"]
+      }
+    },
+    {
+      "case_id": "missing-outbound-aggregate-005",
+      "category": "missing_facts",
+      "description": "Aggregation with distribution requires an outbound license.",
+      "request": {
+        "expression": "Apache-2.0",
+        "facts": {
+          "action": "aggregate",
+          "distribution": true,
+          "distribution_form": "binary",
+          "recipient": "public",
+          "modified": false
+        }
+      },
+      "expect": {
+        "outcome": "Insufficient information",
+        "must_abstain": true,
+        "required_missing_facts": ["outbound_license"]
+      }
+    },
+    {
+      "case_id": "missing-outbound-link-006",
+      "category": "missing_facts",
+      "description": "Linking requires an outbound license.",
+      "request": {
+        "expression": "Apache-2.0",
+        "facts": { "action": "link", "distribution": false }
+      },
+      "expect": {
+        "outcome": "Insufficient information",
+        "must_abstain": true,
+        "required_missing_facts": ["outbound_license"]
+      }
+    },
+    {
+      "case_id": "missing-branch-007",
+      "category": "missing_facts",
+      "description": "An OR expression without a selected branch.",
+      "request": {
+        "expression": "MIT OR Apache-2.0",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": {
+        "outcome": "Insufficient information",
+        "must_abstain": true,
+        "required_missing_facts": ["selected_branch"]
+      }
+    },
+    {
+      "case_id": "missing-outbound-sublicense-008",
+      "category": "missing_facts",
+      "description": "Sublicensing requires an outbound license.",
+      "request": {
+        "expression": "MIT",
+        "facts": {
+          "action": "sublicense",
+          "distribution": true,
+          "distribution_form": "source",
+          "recipient": "public",
+          "modified": false
+        }
+      },
+      "expect": {
+        "outcome": "Insufficient information",
+        "must_abstain": true,
+        "required_missing_facts": ["outbound_license"]
+      }
+    }
+  ]
+}

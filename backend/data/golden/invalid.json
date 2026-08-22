@@ -1,0 +1,64 @@
+{
+  "cases": [
+    {
+      "case_id": "invalid-trailing-or-001",
+      "category": "invalid",
+      "description": "A dangling OR operator must be rejected.",
+      "request": {
+        "expression": "MIT OR",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": { "outcome": "Insufficient information", "must_abstain": true }
+    },
+    {
+      "case_id": "invalid-leading-and-002",
+      "category": "invalid",
+      "description": "A leading AND operator must be rejected.",
+      "request": {
+        "expression": "AND MIT",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": { "outcome": "Insufficient information", "must_abstain": true }
+    },
+    {
+      "case_id": "invalid-empty-group-003",
+      "category": "invalid",
+      "description": "An empty group must be rejected.",
+      "request": {
+        "expression": "()",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": { "outcome": "Insufficient information", "must_abstain": true }
+    },
+    {
+      "case_id": "invalid-adjacent-ids-004",
+      "category": "invalid",
+      "description": "Adjacent identifiers without an operator must be rejected.",
+      "request": {
+        "expression": "MIT Apache-2.0",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": { "outcome": "Insufficient information", "must_abstain": true }
+    },
+    {
+      "case_id": "invalid-dangling-with-005",
+      "category": "invalid",
+      "description": "A dangling WITH must be rejected.",
+      "request": {
+        "expression": "MIT WITH",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": { "outcome": "Insufficient information", "must_abstain": true }
+    },
+    {
+      "case_id": "invalid-bad-licenseref-006",
+      "category": "invalid",
+      "description": "An invalid LicenseRef suffix must be rejected.",
+      "request": {
+        "expression": "LicenseRef-x+",
+        "facts": { "action": "use", "distribution": false }
+      },
+      "expect": { "outcome": "Insufficient information", "must_abstain": true }
+    }
+  ]
+}

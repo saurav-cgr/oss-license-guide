@@ -269,3 +269,18 @@ button:disabled {
   font-size: 0.85rem;
   color: var(--muted);
 }
+
+.provider-note {
+  margin-top: 1rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--caution-border);
+  background: var(--caution-bg);
+  color: #5a4400;
+  font-size: 0.9rem;
+}
+
+.explanation p {
+  margin: 0;
+  line-height: 1.5;
+}
