@@ -3,108 +3,219 @@
     {
       "rule_id": "mit-internal-use",
       "license_expression_pattern": "MIT",
-      "scenario_preconditions": { "distribution": false },
+      "scenario_preconditions": {
+        "distribution": false
+      },
       "outcome": "Likely permitted under stated assumptions",
       "obligations": [],
       "exceptions": [],
       "direction": "MIT component used internally without external distribution",
-      "source_ids": ["spdx:MIT@3.24.0"],
+      "source_ids": [
+        "spdx:MIT@3.24.0"
+      ],
       "review_status": "maintainer_reviewed",
       "reviewer": "maintainer",
       "effective_date": "2026-08-21",
-      "last_verified_at": "2026-08-21"
+      "last_verified_at": "2026-08-21",
+      "permission_citations": [
+        {
+          "source_id": "spdx:MIT@3.24.0",
+          "span_index": 2,
+          "expected_hash": "fa3ff462f020dcadaf3c44b61f0df757293233be81338ffb80c18a3f062c0523"
+        }
+      ]
     },
     {
       "rule_id": "mit-distribute-source-unmodified",
       "license_expression_pattern": "MIT",
-      "scenario_preconditions": { "distribution": true, "distribution_form": "source", "modified": false },
+      "scenario_preconditions": {
+        "distribution": true,
+        "distribution_form": "source",
+        "modified": false
+      },
       "outcome": "Permitted with listed obligations",
       "obligations": [
         {
           "text": "Include the MIT license text",
-          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 2 }]
+          "citations": [
+            {
+              "source_id": "spdx:MIT@3.24.0",
+              "span_index": 3,
+              "expected_hash": "70760316a66259dc346c891a2b9645566853bbdd1020a703d49b7e9ac47f98d5"
+            }
+          ]
         },
         {
           "text": "Retain the original copyright notice",
-          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 3 }]
+          "citations": [
+            {
+              "source_id": "spdx:MIT@3.24.0",
+              "span_index": 3,
+              "expected_hash": "70760316a66259dc346c891a2b9645566853bbdd1020a703d49b7e9ac47f98d5"
+            }
+          ]
         }
       ],
       "exceptions": [],
       "direction": "MIT component redistributed in source form, unmodified",
-      "source_ids": ["spdx:MIT@3.24.0"],
+      "source_ids": [
+        "spdx:MIT@3.24.0"
+      ],
       "review_status": "maintainer_reviewed",
       "reviewer": "maintainer",
       "effective_date": "2026-08-21",
-      "last_verified_at": "2026-08-21"
+      "last_verified_at": "2026-08-21",
+      "permission_citations": [
+        {
+          "source_id": "spdx:MIT@3.24.0",
+          "span_index": 2,
+          "expected_hash": "fa3ff462f020dcadaf3c44b61f0df757293233be81338ffb80c18a3f062c0523"
+        }
+      ]
     },
     {
       "rule_id": "mit-distribute-binary-unmodified",
       "license_expression_pattern": "MIT",
-      "scenario_preconditions": { "distribution": true, "distribution_form": "binary", "modified": false },
+      "scenario_preconditions": {
+        "distribution": true,
+        "distribution_form": "binary",
+        "modified": false
+      },
       "outcome": "Permitted with listed obligations",
       "obligations": [
         {
           "text": "Include the MIT license text in the distribution",
-          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 2 }]
+          "citations": [
+            {
+              "source_id": "spdx:MIT@3.24.0",
+              "span_index": 3,
+              "expected_hash": "70760316a66259dc346c891a2b9645566853bbdd1020a703d49b7e9ac47f98d5"
+            }
+          ]
         },
         {
           "text": "Retain the original copyright notice",
-          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 3 }]
+          "citations": [
+            {
+              "source_id": "spdx:MIT@3.24.0",
+              "span_index": 3,
+              "expected_hash": "70760316a66259dc346c891a2b9645566853bbdd1020a703d49b7e9ac47f98d5"
+            }
+          ]
         }
       ],
       "exceptions": [],
       "direction": "MIT component redistributed in binary form, unmodified",
-      "source_ids": ["spdx:MIT@3.24.0"],
+      "source_ids": [
+        "spdx:MIT@3.24.0"
+      ],
       "review_status": "maintainer_reviewed",
       "reviewer": "maintainer",
       "effective_date": "2026-08-21",
-      "last_verified_at": "2026-08-21"
+      "last_verified_at": "2026-08-21",
+      "permission_citations": [
+        {
+          "source_id": "spdx:MIT@3.24.0",
+          "span_index": 2,
+          "expected_hash": "fa3ff462f020dcadaf3c44b61f0df757293233be81338ffb80c18a3f062c0523"
+        }
+      ]
     },
     {
       "rule_id": "mit-distribute-source-modified",
       "license_expression_pattern": "MIT",
-      "scenario_preconditions": { "distribution": true, "distribution_form": "source", "modified": true },
+      "scenario_preconditions": {
+        "distribution": true,
+        "distribution_form": "source",
+        "modified": true
+      },
       "outcome": "Permitted with listed obligations",
       "obligations": [
         {
           "text": "Include the MIT license text",
-          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 2 }]
+          "citations": [
+            {
+              "source_id": "spdx:MIT@3.24.0",
+              "span_index": 3,
+              "expected_hash": "70760316a66259dc346c891a2b9645566853bbdd1020a703d49b7e9ac47f98d5"
+            }
+          ]
         },
         {
           "text": "Retain the original copyright notice",
-          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 3 }]
+          "citations": [
+            {
+              "source_id": "spdx:MIT@3.24.0",
+              "span_index": 3,
+              "expected_hash": "70760316a66259dc346c891a2b9645566853bbdd1020a703d49b7e9ac47f98d5"
+            }
+          ]
         }
       ],
       "exceptions": [],
       "direction": "MIT component redistributed in source form, modified",
-      "source_ids": ["spdx:MIT@3.24.0"],
+      "source_ids": [
+        "spdx:MIT@3.24.0"
+      ],
       "review_status": "maintainer_reviewed",
       "reviewer": "maintainer",
       "effective_date": "2026-08-21",
-      "last_verified_at": "2026-08-21"
+      "last_verified_at": "2026-08-21",
+      "permission_citations": [
+        {
+          "source_id": "spdx:MIT@3.24.0",
+          "span_index": 2,
+          "expected_hash": "fa3ff462f020dcadaf3c44b61f0df757293233be81338ffb80c18a3f062c0523"
+        }
+      ]
     },
     {
       "rule_id": "mit-distribute-binary-modified",
       "license_expression_pattern": "MIT",
-      "scenario_preconditions": { "distribution": true, "distribution_form": "binary", "modified": true },
+      "scenario_preconditions": {
+        "distribution": true,
+        "distribution_form": "binary",
+        "modified": true
+      },
       "outcome": "Permitted with listed obligations",
       "obligations": [
         {
           "text": "Include the MIT license text in the distribution",
-          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 2 }]
+          "citations": [
+            {
+              "source_id": "spdx:MIT@3.24.0",
+              "span_index": 3,
+              "expected_hash": "70760316a66259dc346c891a2b9645566853bbdd1020a703d49b7e9ac47f98d5"
+            }
+          ]
         },
         {
           "text": "Retain the original copyright notice",
-          "citations": [{ "source_id": "spdx:MIT@3.24.0", "span_index": 3 }]
+          "citations": [
+            {
+              "source_id": "spdx:MIT@3.24.0",
+              "span_index": 3,
+              "expected_hash": "70760316a66259dc346c891a2b9645566853bbdd1020a703d49b7e9ac47f98d5"
+            }
+          ]
         }
       ],
       "exceptions": [],
       "direction": "MIT component redistributed in binary form, modified",
-      "source_ids": ["spdx:MIT@3.24.0"],
+      "source_ids": [
+        "spdx:MIT@3.24.0"
+      ],
       "review_status": "maintainer_reviewed",
       "reviewer": "maintainer",
       "effective_date": "2026-08-21",
-      "last_verified_at": "2026-08-21"
+      "last_verified_at": "2026-08-21",
+      "permission_citations": [
+        {
+          "source_id": "spdx:MIT@3.24.0",
+          "span_index": 2,
+          "expected_hash": "fa3ff462f020dcadaf3c44b61f0df757293233be81338ffb80c18a3f062c0523"
+        }
+      ]
     }
   ]
 }

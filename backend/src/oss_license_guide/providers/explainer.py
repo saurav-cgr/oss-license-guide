@@ -9,6 +9,7 @@ made for an invalid structured explanation.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 from oss_license_guide.config.settings import Settings
@@ -17,7 +18,7 @@ from oss_license_guide.providers.protocol import (
     ProviderOutputError,
     ProviderRequest,
 )
-from oss_license_guide.providers.registry import get_adapter, is_allowed
+from oss_license_guide.providers.registry import available_models, get_adapter, is_allowed
 
 # Keys the model must never emit: they would inject authoritative content.
 _FORBIDDEN_KEYS = {
@@ -31,13 +32,13 @@ _FORBIDDEN_KEYS = {
 }
 
 _SYSTEM_PROMPT = (
-    "You are a cautious legal-information assistant. You explain already-approved "
-    "structured findings. You never add obligations, change outcomes, create "
-    "citations, or give legal advice. Answer only from the provided findings. "
-    "If information is missing, say so. Output a single JSON object with exactly "
-    "one field named \"explanation\" containing a short plain-language "
-    "explanation (2-4 sentences) that restates the structured findings and the "
-    "obligations in plain language. Do not include any other fields."
+    "You are a cautious legal-information assistant. You restate already-approved "
+    "structured findings. You never add obligations, permissions, change outcomes, "
+    "create citations, or give legal advice. Answer only from the provided findings. "
+    "Output a single JSON object with exactly one field named \"elaboration\" "
+    "containing a short plain-language restatement (2-3 sentences) of the outcome "
+    "and any listed obligations. Do not introduce any requirement, prohibition, "
+    "grant, payment, or liability. Do not include any other fields."
 )
 
 
@@ -55,6 +56,7 @@ class ExplanationFindings:
     obligations: list[dict] = field(default_factory=list)
     what_could_change: list[str] = field(default_factory=list)
     escalation: str = ""
+    question: str = ""
 
 
 @dataclass
@@ -83,6 +85,16 @@ def generate_explanation(
             note=f"Provider {provider!r} is not available; deterministic result shown.",
         )
 
+    if model not in available_models(provider):
+        return ExplanationResult(
+            provider=provider,
+            model=model,
+            note=(
+                f"Requested model {model!r} is not allowlisted for {provider!r}; "
+                "deterministic result shown."
+            ),
+        )
+
     key = _resolve_key(provider, api_key, settings)
     if not key:
         return ExplanationResult(
@@ -101,13 +113,16 @@ def generate_explanation(
 
     request = _build_request(provider, model, key, findings, settings)
 
-    explanation, response, error = _attempt(adapter, request, settings)
-    if explanation is None and error is None and settings.provider_max_repairs > 0:
-        explanation, response, error = _attempt(
-            adapter, _repair_request(request, ""), settings
+    elaboration, response, error = _attempt(adapter, request, settings, findings)
+    if elaboration is None and error is None and settings.provider_max_repairs > 0:
+        elaboration, response, error = _attempt(
+            adapter, _repair_request(request, ""), settings, findings
         )
 
-    if explanation is not None:
+    if elaboration is not None:
+        explanation = _assemble_deterministic(findings)
+        if elaboration:
+            explanation += "\n\n" + elaboration
         return ExplanationResult(
             explanation=explanation,
             provider=provider,
@@ -143,6 +158,7 @@ def _attempt(
     adapter: object,
     request: ProviderRequest,
     settings: Settings,
+    findings: ExplanationFindings,
 ) -> tuple[str | None, object | None, ProviderError | None]:
     """Run one generation attempt.
 
@@ -156,7 +172,7 @@ def _attempt(
         return None, None, None
     except ProviderError as error:
         return None, None, error
-    explanation = _validate(response.text, settings)
+    explanation = _validate(response.text, settings, findings)
     if explanation is None:
         return None, None, None
     return explanation, response, None
@@ -196,9 +212,53 @@ def _user_prompt(findings: ExplanationFindings) -> str:
     lines.extend(f"- {item}" for item in findings.what_could_change)
     lines.append("")
     lines.append(f"Review guidance: {findings.escalation}")
+    if findings.question:
+        lines.append("")
+        lines.append(f"User's question (for context only): {findings.question}")
     lines.append("")
-    lines.append('Respond with JSON: {"explanation": "<your explanation>"}')
+    lines.append('Respond with JSON: {"elaboration": "<your restatement>"}')
     return "\n".join(lines)
+
+
+def _assemble_deterministic(findings: ExplanationFindings) -> str:
+    """Assemble a plain-language explanation from validated deterministic fragments.
+
+    Every claim in this text is derived from the reviewed structured findings;
+    no language-model content contributes a new obligation, permission, or
+    conclusion here.
+    """
+    lines = [f"{findings.outcome}. {findings.short_answer}"]
+    if findings.obligations:
+        lines.append("Obligations:")
+        lines.extend(f"- {obligation['text']}" for obligation in findings.obligations)
+    lines.append(findings.escalation)
+    return "\n".join(lines)
+
+
+def _normalize(value: str) -> str:
+    """Lowercase and collapse whitespace for containment comparison."""
+    return " ".join(value.lower().split())
+
+
+def _sentences(value: str) -> list[str]:
+    """Split ``value`` into trimmed sentences."""
+    return [part for part in re.split(r"(?<=[.!?])\s+", value.strip()) if part.strip()]
+
+
+def _derivable_from_findings(value: str, findings: ExplanationFindings) -> bool:
+    """Return True if every sentence is a fragment of the deterministic text.
+
+    A model sentence is accepted only when its normalized text is a contiguous
+    substring of the normalized deterministic explanation assembled from the
+    structured findings. This rejects any new permission, obligation, payment,
+    or liability wording the model might invent, regardless of phrasing.
+    """
+    pool = _normalize(_assemble_deterministic(findings))
+    for sentence in _sentences(value):
+        normalized = _normalize(sentence.rstrip(".!?"))
+        if normalized and normalized not in pool:
+            return False
+    return True
 
 
 def _repair_request(request: ProviderRequest, prior: str) -> ProviderRequest:
@@ -210,14 +270,14 @@ def _repair_request(request: ProviderRequest, prior: str) -> ProviderRequest:
     try:
         parsed = parser(prior)
         detail = "the output contained unexpected fields" if not isinstance(parsed, dict) else (
-            "the output was missing a valid \"explanation\" string"
+            "the output was missing a valid \"elaboration\" string"
         )
     except ProviderOutputError:
         detail = "the output was not parseable JSON"
     corrective = (
         f"\n\nYour previous response was rejected: {detail}. "
-        'Respond again with ONLY a JSON object: {"explanation": "<2-4 sentence explanation>"}. '
-        "No other fields, no extra text."
+        'Respond again with ONLY a JSON object: {"elaboration": "<2-3 sentence restatement>"}. '
+        "No other fields, no extra text, and do not introduce any requirement or obligation."
     )
     return ProviderRequest(
         provider=request.provider,
@@ -230,8 +290,18 @@ def _repair_request(request: ProviderRequest, prior: str) -> ProviderRequest:
     )
 
 
-def _validate(text: str, settings: Settings) -> str | None:
-    """Return a validated explanation string, or None if the output is invalid."""
+def _validate(
+    text: str,
+    settings: Settings,
+    findings: ExplanationFindings,
+) -> str | None:
+    """Return a screened elaboration string, or None if the output is invalid.
+
+    The model contributes only a bounded ``elaboration`` slot. Any output that
+    fails JSON shape, carries forbidden keys, is oversized, or is not derivable
+    from the deterministic findings is rejected, so new uncited permissions or
+    obligations can never reach the display.
+    """
     import oss_license_guide.providers.gemini as gemini_mod
     import oss_license_guide.providers.openai as openai_mod
 
@@ -245,13 +315,15 @@ def _validate(text: str, settings: Settings) -> str | None:
         return None
     if _FORBIDDEN_KEYS & set(payload):
         return None
-    value = payload.get("explanation")
+    value = payload.get("elaboration")
     if not isinstance(value, str):
         return None
     value = value.strip()
     if not value:
         return None
     if len(value) > settings.provider_max_output_chars:
+        return None
+    if not _derivable_from_findings(value, findings):
         return None
     return value
 

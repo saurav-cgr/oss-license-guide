@@ -48,14 +48,27 @@ export function useAnalysis(client: ApiClient): UseAnalysis {
       controllerRef.current = controller;
 
       setState({ status: "loading" });
-      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+      let timedOut = false;
+      const timeoutId = setTimeout(() => {
+        timedOut = true;
+        controller.abort();
+      }, REQUEST_TIMEOUT_MS);
       try {
         const result = await client.analyze(request, { apiKey, signal: controller.signal });
         if (!controller.signal.aborted) {
           setState({ status: "success", result });
         }
       } catch (error) {
-        if (!controller.signal.aborted) {
+        if (controller.signal.aborted) {
+          // A timeout abort must surface as an error, while an abort caused by
+          // a newer request superseding this one is intentionally ignored.
+          if (timedOut) {
+            setState({
+              status: "error",
+              error: { kind: "timeout", message: "The request timed out. Please try again." },
+            });
+          }
+        } else {
           setState({ status: "error", error: classify(error) });
         }
       } finally {

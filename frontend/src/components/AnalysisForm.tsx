@@ -1,15 +1,17 @@
 import { useState } from "react";
+import type { ApiClient } from "../api/client";
 import type { AnalyzeRequest, FactsInput } from "../api/types";
 import { ProviderSettings, type ProviderId } from "./ProviderSettings";
 import { ScenarioFacts } from "./ScenarioFacts";
 import type { AnalysisState } from "./useAnalysis";
 
 interface AnalysisFormProps {
+  client: ApiClient;
   state: AnalysisState;
   onRun: (request: AnalyzeRequest, apiKey?: string) => Promise<void>;
 }
 
-export function AnalysisForm({ state, onRun }: AnalysisFormProps) {
+export function AnalysisForm({ client, state, onRun }: AnalysisFormProps) {
   const [expression, setExpression] = useState("");
   const [question, setQuestion] = useState("");
   const [facts, setFacts] = useState<FactsInput>({});
@@ -70,9 +72,13 @@ export function AnalysisForm({ state, onRun }: AnalysisFormProps) {
           onChange={(event) => setQuestion(event.target.value)}
           disabled={loading}
         />
+        <p className="hint">
+          Context only for a model explanation; it does not change the deterministic analysis.
+        </p>
       </div>
 
       <ProviderSettings
+        client={client}
         provider={provider}
         model={model}
         apiKey={apiKey}

@@ -45,11 +45,19 @@ class LicenseRecord:
 
 @dataclass
 class Catalog:
-    """The complete normalized SPDX catalog for one release."""
+    """The normalized SPDX catalog for one release.
+
+    The catalog covers the full SPDX identifier set, but only records that had
+    an ingested detail file carry canonical full text and citation spans. Records
+    without a detail file are metadata-only and cannot support span citations.
+    """
 
     version: str
     licenses: dict[str, LicenseRecord]
     exceptions: dict[str, LicenseRecord]
+    source_type: str = "spdx"
+    source_url: str = ""
+    retrieved_at: str = ""
 
     def lookup(self, identifier: str) -> LicenseRecord | None:
         """Return an exact record for ``identifier`` (case-insensitive)."""
@@ -90,7 +98,26 @@ def load_catalog(path: Path | None = None) -> Catalog:
         item["id"]: _record_from_dict(item)
         for item in data.get("exceptions", [])
     }
-    return Catalog(version=data.get("version", ""), licenses=licenses, exceptions=exceptions)
+    source_url, retrieved_at = _source_metadata(catalog_path)
+    return Catalog(
+        version=data.get("version", ""),
+        licenses=licenses,
+        exceptions=exceptions,
+        source_url=source_url,
+        retrieved_at=retrieved_at,
+    )
+
+
+def _source_metadata(catalog_path: Path) -> tuple[str, str]:
+    """Read source URL and retrieval date from the sibling manifest."""
+    manifest_path = catalog_path.parent / "manifest.json"
+    if not manifest_path.is_file():
+        return "", ""
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return "", ""
+    return manifest.get("source", ""), manifest.get("retrieved_at", "")
 
 
 def _record_from_dict(item: dict) -> LicenseRecord:

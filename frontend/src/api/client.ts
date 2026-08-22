@@ -8,6 +8,15 @@ export interface HealthResponse {
   version: string;
 }
 
+export interface ProviderInfoDto {
+  id: string;
+  models: string[];
+}
+
+export interface ProviderListResponse {
+  providers: ProviderInfoDto[];
+}
+
 export interface ApiClientOptions {
   baseUrl: string;
   fetchImpl?: typeof fetch;
@@ -58,8 +67,17 @@ export class ApiClient {
     return (await response.json()) as HealthResponse;
   }
 
-  async analyze(request: AnalyzeRequest, options: AnalyzeOptions = {}): Promise<AnalysisResponse> {
+  /** Return the server-controlled provider allowlist and their model choices. */
+  async listProviders(): Promise<ProviderListResponse> {
     const doFetch = this.fetchImpl ?? globalThis.fetch;
+    const response = await doFetch(`${this.baseUrl}/api/v1/providers`);
+    if (!response.ok) {
+      throw new Error(`Providers request failed with status ${response.status}`);
+    }
+    return (await response.json()) as ProviderListResponse;
+  }
+
+  async analyze(request: AnalyzeRequest, options: AnalyzeOptions = {}): Promise<AnalysisResponse> {    const doFetch = this.fetchImpl ?? globalThis.fetch;
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (options.apiKey) {
       // The key travels only in an ephemeral request header, never in storage or URLs.

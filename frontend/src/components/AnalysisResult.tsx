@@ -1,4 +1,4 @@
-import type { AnalysisResponse, ClaimDto, CitationDto } from "../api/types";
+import type { AnalysisResponse, ClaimDto, CitationDto, RuleReviewDto } from "../api/types";
 
 interface AnalysisResultProps {
   result: AnalysisResponse;
@@ -42,9 +42,22 @@ function CitationList({ citations }: { citations: CitationDto[] }) {
             {citation.source_id} §{citation.span_index}
           </span>
           <blockquote>{citation.text}</blockquote>
+          <SourceMeta citation={citation} />
         </li>
       ))}
     </ul>
+  );
+}
+
+function SourceMeta({ citation }: { citation: CitationDto }) {
+  const hasMeta = citation.source_type || citation.version || citation.source_url;
+  if (!hasMeta) return null;
+  return (
+    <p className="source-meta">
+      {citation.source_type}
+      {citation.version ? ` · v${citation.version}` : ""}
+      {citation.source_url ? ` · ${citation.source_url}` : ""}
+    </p>
   );
 }
 
@@ -95,6 +108,7 @@ function Evidence({ evidence }: { evidence: CitationDto[] }) {
               {entry.source_id} §{entry.span_index}
             </span>
             <blockquote>{entry.text}</blockquote>
+            <SourceMeta citation={entry} />
           </li>
         ))}
       </ul>
@@ -102,9 +116,76 @@ function Evidence({ evidence }: { evidence: CitationDto[] }) {
   );
 }
 
+function PermissionClaim({ permission }: { permission: ClaimDto | null }) {
+  if (!permission) return null;
+  return (
+    <section className="result-section">
+      <h3>Permissions</h3>
+      <ul className="obligation-list">
+        <li>
+          <p className="claim-text">{permission.text}</p>
+          <CitationList citations={permission.citations} />
+        </li>
+      </ul>
+    </section>
+  );
+}
+
+function RuleReview({ rule }: { rule: RuleReviewDto | null }) {
+  if (!rule) return null;
+  return (
+    <section className="result-section">
+      <h3>Rule provenance</h3>
+      <dl className="rule-review">
+        <div>
+          <dt>Rule</dt>
+          <dd>{rule.rule_id}</dd>
+        </div>
+        <div>
+          <dt>Review status</dt>
+          <dd>{rule.review_status}</dd>
+        </div>
+        <div>
+          <dt>Version</dt>
+          <dd>{rule.rule_version || "—"}</dd>
+        </div>
+        <div>
+          <dt>Content hash</dt>
+          <dd>{rule.content_hash ? rule.content_hash.slice(0, 12) : "—"}</dd>
+        </div>
+      </dl>
+      <p className="hint">Rule provenance is maintainer-reviewed, not independent legal review.</p>
+    </section>
+  );
+}
+
 /** Renders the structured analysis result, including abstention and fallback states. */
 export function AnalysisResult({ result }: AnalysisResultProps) {
   const tone = toneFor(result.outcome);
+
+  if (result.blocked) {
+    return (
+      <section className="analysis-result abstain" aria-live="polite">
+        <header className="result-header">
+          <h2>
+            <span className="outcome-badge">Analysis blocked</span>
+          </h2>
+          <p className="short-answer">
+            Analysis blocked because the supporting evidence could not be validated.
+          </p>
+        </header>
+        <div role="alert" className="blocked">
+          <h3>Citation errors</h3>
+          <p>
+            The supporting evidence could not be validated, so no substantive conclusion is
+            shown.
+          </p>
+          <ListSection title="Citation errors" items={result.citation_errors} />
+        </div>
+        <p className="disclaimer">{result.disclaimer}</p>
+      </section>
+    );
+  }
 
   return (
     <section className={`analysis-result ${tone}`} aria-live="polite">
@@ -116,18 +197,7 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
         <p className="short-answer">{result.short_answer}</p>
       </header>
 
-      {result.blocked && (
-        <div role="alert" className="blocked">
-          <h3>Analysis blocked</h3>
-          <p>
-            The supporting evidence could not be validated, so no substantive conclusion is
-            shown.
-          </p>
-          <ListSection title="Citation errors" items={result.citation_errors} />
-        </div>
-      )}
-
-      {!result.blocked && result.missing_facts.length > 0 && (
+      {result.missing_facts.length > 0 && (
         <div role="alert" className="missing">
           <h3>Missing information</h3>
           <p>
@@ -153,10 +223,12 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
           {result.provider_note}
         </div>
       )}
+      <PermissionClaim permission={result.permission} />
       <ObligationsList obligations={result.obligations} />
       <ListSection title="What could change this" items={result.what_could_change} />
       <Evidence evidence={result.evidence} />
       <Confidence confidence={result.confidence} />
+      <RuleReview rule={result.rule} />
 
       {result.warnings.length > 0 && (
         <section className="result-section">

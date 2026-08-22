@@ -37,6 +37,9 @@ describe("App health check flow", () => {
 
     render(<App />);
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(/Backend unreachable/);
+    const alerts = await screen.findAllByRole("alert");
+    expect(
+      alerts.some((alert) => /Backend unreachable/.test(alert.textContent ?? "")),
+    ).toBe(true);
   });
 });

@@ -34,10 +34,17 @@ class AnalysisOutcome(StrEnum):
 
 @dataclass(frozen=True)
 class Citation:
-    """A reference to one exact source span."""
+    """A reference to one exact source span, pinned to the approved hash.
+
+    ``expected_hash`` records the sha256 of the exact text span that a reviewer
+    approved. Resolution rejects the citation if the active catalog's span hash
+    differs, so regenerated or drifted source text cannot silently change the
+    evidence supporting an existing reviewed rule.
+    """
 
     source_id: str
     span_index: int
+    expected_hash: str = ""
 
 
 @dataclass(frozen=True)
@@ -50,13 +57,19 @@ class ObligationClaim:
 
 @dataclass(frozen=True)
 class Rule:
-    """A single versioned rule record."""
+    """A single versioned rule record.
+
+    ``rule_version`` is a maintainer-assigned immutable revision identifier.
+    ``content_hash`` is computed from the rule's canonical serialization so a
+    response can identify the exact approved revision it evaluated.
+    """
 
     rule_id: str
     license_expression_pattern: str
     scenario_preconditions: dict[str, Any] = field(default_factory=dict)
     outcome: str = ""
     obligations: list[ObligationClaim] = field(default_factory=list)
+    permission_citations: list[Citation] = field(default_factory=list)
     exceptions: list[str] = field(default_factory=list)
     direction: str = ""
     source_ids: list[str] = field(default_factory=list)
@@ -64,3 +77,5 @@ class Rule:
     reviewer: str = ""
     effective_date: str = ""
     last_verified_at: str = ""
+    rule_version: str = ""
+    content_hash: str = ""

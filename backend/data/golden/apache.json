@@ -6,19 +6,43 @@
       "description": "Apache-2.0 component used internally, no distribution.",
       "request": {
         "expression": "Apache-2.0",
-        "facts": { "action": "use", "distribution": false }
+        "facts": {
+          "action": "use",
+          "distribution": false
+        }
       },
-      "expect": { "outcome": "Likely permitted under stated assumptions", "must_abstain": false }
+      "expect": {
+        "outcome": "Likely permitted under stated assumptions",
+        "must_abstain": false,
+        "expected_permission": {
+          "text": "Permission to use Apache-2.0 under the stated scenario",
+          "source_id": "spdx:Apache-2.0@3.24.0",
+          "span_index": 13,
+          "entailing": [
+            "grant of copyright license",
+            "irrevocable"
+          ]
+        }
+      }
     },
     {
       "case_id": "apache-internal-modify-002",
       "category": "apache_supported",
-      "description": "Apache-2.0 component modified but never distributed.",
+      "description": "Apache-2.0 component modified but never distributed is outside the reviewed action set.",
       "request": {
         "expression": "Apache-2.0",
-        "facts": { "action": "modify", "distribution": false }
+        "facts": {
+          "action": "modify",
+          "distribution": false
+        }
       },
-      "expect": { "outcome": "Likely permitted under stated assumptions", "must_abstain": false }
+      "expect": {
+        "must_abstain": true,
+        "forbidden_outcomes": [
+          "Likely permitted under stated assumptions",
+          "Permitted with listed obligations"
+        ]
+      }
     },
     {
       "case_id": "apache-source-unmodified-public-003",
@@ -31,16 +55,31 @@
           "distribution": true,
           "distribution_form": "source",
           "recipient": "public",
-          "modified": false
+          "modified": false,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Provide a copy of the Apache-2.0 license", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "text": "Include the NOTICE file if one is present", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "text": "Retain any copyright, patent, trademark, and attribution notices", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "text": "Provide a copy of the Apache-2.0 license",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "text": "Include the NOTICE file if one is present",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          },
+          {
+            "text": "Retain any copyright, patent, trademark, and attribution notices",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 18
+          }
         ]
       }
     },
@@ -55,16 +94,31 @@
           "distribution": true,
           "distribution_form": "source",
           "recipient": "customers",
-          "modified": false
+          "modified": false,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Provide a copy of the Apache-2.0 license", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "text": "Include the NOTICE file if one is present", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "text": "Retain any copyright, patent, trademark, and attribution notices", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "text": "Provide a copy of the Apache-2.0 license",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "text": "Include the NOTICE file if one is present",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          },
+          {
+            "text": "Retain any copyright, patent, trademark, and attribution notices",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 18
+          }
         ]
       }
     },
@@ -79,16 +133,31 @@
           "distribution": true,
           "distribution_form": "source",
           "recipient": "contractors",
-          "modified": false
+          "modified": false,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Provide a copy of the Apache-2.0 license", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "text": "Include the NOTICE file if one is present", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "text": "Retain any copyright, patent, trademark, and attribution notices", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "text": "Provide a copy of the Apache-2.0 license",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "text": "Include the NOTICE file if one is present",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          },
+          {
+            "text": "Retain any copyright, patent, trademark, and attribution notices",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 18
+          }
         ]
       }
     },
@@ -103,16 +172,31 @@
           "distribution": true,
           "distribution_form": "source",
           "recipient": "employees",
-          "modified": false
+          "modified": false,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Provide a copy of the Apache-2.0 license", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "text": "Include the NOTICE file if one is present", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "text": "Retain any copyright, patent, trademark, and attribution notices", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "text": "Provide a copy of the Apache-2.0 license",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "text": "Include the NOTICE file if one is present",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          },
+          {
+            "text": "Retain any copyright, patent, trademark, and attribution notices",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 18
+          }
         ]
       }
     },
@@ -127,17 +211,36 @@
           "distribution": true,
           "distribution_form": "source",
           "recipient": "public",
-          "modified": true
+          "modified": true,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Provide a copy of the Apache-2.0 license", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "text": "Retain and clearly mark any modified files", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 17 },
-          { "text": "Include the NOTICE file if one is present", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "text": "Retain any copyright, patent, trademark, and attribution notices", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "text": "Provide a copy of the Apache-2.0 license",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "text": "Retain and clearly mark any modified files",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 17
+          },
+          {
+            "text": "Include the NOTICE file if one is present",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          },
+          {
+            "text": "Retain any copyright, patent, trademark, and attribution notices",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 18
+          }
         ]
       }
     },
@@ -152,17 +255,36 @@
           "distribution": true,
           "distribution_form": "source",
           "recipient": "employees",
-          "modified": true
+          "modified": true,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Provide a copy of the Apache-2.0 license", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "text": "Retain and clearly mark any modified files", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 17 },
-          { "text": "Include the NOTICE file if one is present", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "text": "Retain any copyright, patent, trademark, and attribution notices", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "text": "Provide a copy of the Apache-2.0 license",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "text": "Retain and clearly mark any modified files",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 17
+          },
+          {
+            "text": "Include the NOTICE file if one is present",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          },
+          {
+            "text": "Retain any copyright, patent, trademark, and attribution notices",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 18
+          }
         ]
       }
     },
@@ -177,17 +299,36 @@
           "distribution": true,
           "distribution_form": "source",
           "recipient": "customers",
-          "modified": true
+          "modified": true,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Provide a copy of the Apache-2.0 license", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "text": "Retain and clearly mark any modified files", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 17 },
-          { "text": "Include the NOTICE file if one is present", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "text": "Retain any copyright, patent, trademark, and attribution notices", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "text": "Provide a copy of the Apache-2.0 license",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "text": "Retain and clearly mark any modified files",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 17
+          },
+          {
+            "text": "Include the NOTICE file if one is present",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          },
+          {
+            "text": "Retain any copyright, patent, trademark, and attribution notices",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 18
+          }
         ]
       }
     },
@@ -202,16 +343,26 @@
           "distribution": true,
           "distribution_form": "binary",
           "recipient": "public",
-          "modified": false
+          "modified": false,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Provide a copy of the Apache-2.0 license", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "text": "Include the NOTICE file if one is present", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "text": "Retain any copyright, patent, trademark, and attribution notices", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "text": "Provide a copy of the Apache-2.0 license",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "text": "Include the NOTICE file if one is present",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          }
         ]
       }
     },
@@ -226,16 +377,26 @@
           "distribution": true,
           "distribution_form": "binary",
           "recipient": "customers",
-          "modified": false
+          "modified": false,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Provide a copy of the Apache-2.0 license", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "text": "Include the NOTICE file if one is present", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "text": "Retain any copyright, patent, trademark, and attribution notices", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "text": "Provide a copy of the Apache-2.0 license",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "text": "Include the NOTICE file if one is present",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          }
         ]
       }
     },
@@ -250,16 +411,26 @@
           "distribution": true,
           "distribution_form": "binary",
           "recipient": "contractors",
-          "modified": false
+          "modified": false,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Provide a copy of the Apache-2.0 license", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "text": "Include the NOTICE file if one is present", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "text": "Retain any copyright, patent, trademark, and attribution notices", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "text": "Provide a copy of the Apache-2.0 license",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "text": "Include the NOTICE file if one is present",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          }
         ]
       }
     },
@@ -274,16 +445,31 @@
           "distribution": true,
           "distribution_form": "binary",
           "recipient": "public",
-          "modified": true
+          "modified": true,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Provide a copy of the Apache-2.0 license", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "text": "Include the NOTICE file if one is present", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "text": "Retain any copyright, patent, trademark, and attribution notices", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "text": "Provide a copy of the Apache-2.0 license",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "text": "Include the NOTICE file if one is present",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          },
+          {
+            "text": "Retain and clearly mark any modified files",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 17
+          }
         ]
       }
     },
@@ -298,16 +484,31 @@
           "distribution": true,
           "distribution_form": "binary",
           "recipient": "customers",
-          "modified": true
+          "modified": true,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Provide a copy of the Apache-2.0 license", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "text": "Include the NOTICE file if one is present", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "text": "Retain any copyright, patent, trademark, and attribution notices", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "text": "Provide a copy of the Apache-2.0 license",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "text": "Include the NOTICE file if one is present",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          },
+          {
+            "text": "Retain and clearly mark any modified files",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 17
+          }
         ]
       }
     },
@@ -322,16 +523,31 @@
           "distribution": true,
           "distribution_form": "binary",
           "recipient": "contractors",
-          "modified": true
+          "modified": true,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Provide a copy of the Apache-2.0 license", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "text": "Include the NOTICE file if one is present", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "text": "Retain any copyright, patent, trademark, and attribution notices", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "text": "Provide a copy of the Apache-2.0 license",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "text": "Include the NOTICE file if one is present",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          },
+          {
+            "text": "Retain and clearly mark any modified files",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 17
+          }
         ]
       }
     }

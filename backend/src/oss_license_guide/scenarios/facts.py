@@ -21,6 +21,9 @@ class FactType(StrEnum):
     MODIFIED = "modified"
     OUTBOUND_LICENSE = "outbound_license"
     SELECTED_BRANCH = "selected_branch"
+    LICENSE_FILE_PRESENT = "license_file_present"
+    COPYRIGHT_NOTICE_PRESENT = "copyright_notice_present"
+    NOTICE_FILE_PRESENT = "notice_file_present"
 
 
 class Provenance(StrEnum):

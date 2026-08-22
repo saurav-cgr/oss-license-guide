@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "../../src/App";
 import type { AnalysisResponse } from "../../src/api/types";
@@ -23,10 +23,29 @@ const SAMPLE: AnalysisResponse = {
           span_index: 16,
           text: "You must give any other recipients of the Work a copy of this License.",
           hash: "abc123",
+          source_type: "spdx",
+          source_url: "https://spdx.org/licenses/Apache-2.0.html",
+          version: "3.24.0",
+          retrieved_at: "2026-08-21T14:47:43Z",
         },
       ],
     },
   ],
+  permission: {
+    text: "Permission to use Apache-2.0 under the stated scenario",
+    citations: [
+      {
+        source_id: "spdx:Apache-2.0@3.24.0",
+        span_index: 13,
+        text: "Subject to the terms and conditions of this License, each Contributor hereby grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable copyright license.",
+        hash: "def456",
+        source_type: "spdx",
+        source_url: "https://spdx.org/licenses/Apache-2.0.html",
+        version: "3.24.0",
+        retrieved_at: "2026-08-21T14:47:43Z",
+      },
+    ],
+  },
   what_could_change: ["A different scenario fact could change this result."],
   evidence: [
     {
@@ -34,6 +53,10 @@ const SAMPLE: AnalysisResponse = {
       span_index: 16,
       text: "You must give any other recipients of the Work a copy of this License.",
       hash: "abc123",
+      source_type: "spdx",
+      source_url: "https://spdx.org/licenses/Apache-2.0.html",
+      version: "3.24.0",
+      retrieved_at: "2026-08-21T14:47:43Z",
     },
   ],
   confidence: { rule_coverage: "High", scenario_completeness: "High", expression_parsing: "High" },
@@ -42,6 +65,15 @@ const SAMPLE: AnalysisResponse = {
   missing_facts: [],
   warnings: [],
   rule_id: "apache-2.0-redistribute",
+  rule: {
+    rule_id: "apache-2.0-redistribute",
+    review_status: "maintainer_reviewed",
+    reviewer: "maintainer",
+    effective_date: "2026-08-21",
+    last_verified_at: "2026-08-21",
+    rule_version: "1",
+    content_hash: "0123456789abcdef",
+  },
   citation_errors: [],
   blocked: false,
   rendered: "rendered fallback text",
@@ -69,12 +101,24 @@ function errorJson(status: number, code: string, message: string) {
 
 type FetchStub = ReturnType<typeof vi.fn>;
 
+const PROVIDERS = {
+  providers: [
+    { id: "gemini", models: ["gemini-2.0-flash"] },
+    { id: "openai", models: ["gpt-4o-mini"] },
+  ],
+};
+
 function stubFetch(handlers: {
   analyses?: (init: RequestInit | undefined) => Promise<Response>;
+  providers?: () => Promise<Response>;
 }): FetchStub {
   return vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
     if (url.endsWith("/api/v1/health")) return okJson(HEALTH);
+    if (url.endsWith("/api/v1/providers")) {
+      if (handlers.providers) return handlers.providers();
+      return okJson(PROVIDERS);
+    }
     if (url.endsWith("/api/v1/analyses")) {
       if (handlers.analyses) return handlers.analyses(init);
       return okJson(SAMPLE);
@@ -189,8 +233,55 @@ describe("analysis experience", () => {
 
     submitAnalysis();
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(/Analysis blocked/);
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(/supporting evidence could not be validated/);
     expect(screen.getByText(/span hash mismatch/)).toBeInTheDocument();
+    // No substantive conclusion is shown when the answer is blocked.
+    expect(screen.queryByText(/permitted provided the listed obligations/)).not.toBeInTheDocument();
+    expect(screen.queryByText("Retain the license and attribution notices.")).not.toBeInTheDocument();
+  });
+
+  it("surfaces a timeout when the real timer aborts the request", async () => {
+    vi.useFakeTimers();
+    const fetchStub = stubFetch({
+      analyses: (init) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () =>
+            reject(new DOMException("aborted", "AbortError")),
+          );
+        }),
+    });
+    vi.stubGlobal("fetch", fetchStub);
+    render(<App />);
+
+    submitAnalysis();
+    // Advance past the 15s timeout so the real setTimeout -> abort path fires.
+    await vi.advanceTimersByTimeAsync(15001);
+
+    expect(screen.getByRole("alert")).toHaveTextContent(/timed out/);
+    vi.useRealTimers();
+  });
+
+  it("renders only server-allowlisted providers", async () => {
+    const fetchStub = vi.fn((input: RequestInfo | URL) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      if (url.endsWith("/api/v1/health")) return okJson(HEALTH);
+      if (url.endsWith("/api/v1/providers"))
+        return okJson({ providers: [{ id: "gemini", models: ["gemini-2.0-flash"] }] });
+      if (url.endsWith("/api/v1/analyses")) return okJson(SAMPLE);
+      return okJson({});
+    });
+    vi.stubGlobal("fetch", fetchStub);
+    render(<App />);
+
+    const select = await screen.findByLabelText(/Provider/);
+    await waitFor(() => {
+      const options = Array.from(select.querySelectorAll("option")).map((o) => o.textContent);
+      expect(options).toContain("Deterministic (no model)");
+      expect(options).toContain("gemini");
+      // "openai" is not in the server allowlist and must not be selectable.
+      expect(options).not.toContain("openai");
+    });
   });
 
   it("renders a missing-facts prompt when the outcome depends on unknown facts", async () => {
@@ -223,6 +314,10 @@ describe("analysis experience", () => {
     vi.stubGlobal("fetch", fetchStub);
     render(<App />);
 
+    await waitFor(() => {
+      const select = screen.getByLabelText(/Provider/) as HTMLSelectElement;
+      expect([...select.options].some((option) => option.value === "gemini")).toBe(true);
+    });
     fireEvent.change(screen.getByLabelText(/Provider/), { target: { value: "gemini" } });
     fireEvent.change(await screen.findByLabelText(/API key/), {
       target: { value: "sk-secret-123" },
@@ -267,6 +362,10 @@ describe("analysis experience", () => {
     vi.stubGlobal("fetch", fetchStub);
     render(<App />);
 
+    await waitFor(() => {
+      const select = screen.getByLabelText(/Provider/) as HTMLSelectElement;
+      expect([...select.options].some((option) => option.value === "gemini")).toBe(true);
+    });
     fireEvent.change(screen.getByLabelText(/Provider/), { target: { value: "gemini" } });
     fireEvent.change(await screen.findByLabelText(/API key/), {
       target: { value: "sk-provider-key" },
@@ -277,5 +376,43 @@ describe("analysis experience", () => {
     expect(
       screen.getByText(/Apache-2.0 is permitted provided the listed obligations are satisfied/),
     ).toBeInTheDocument();
+  });
+
+  it("renders the cited permission claim, rule provenance, and source metadata", async () => {
+    vi.stubGlobal("fetch", stubFetch({}));
+    render(<App />);
+
+    submitAnalysis();
+
+    expect(await screen.findByText("Permissions")).toBeInTheDocument();
+    expect(screen.getByText(/Permission to use Apache-2.0/)).toBeInTheDocument();
+    expect(screen.getByText("Rule provenance")).toBeInTheDocument();
+    expect(screen.getByText("maintainer_reviewed")).toBeInTheDocument();
+    expect(screen.getAllByText(/spdx · v3\.24\.0/).length).toBeGreaterThan(0);
+  });
+
+  it("shows deterministic-only when the server allowlist is intentionally empty", async () => {
+    vi.stubGlobal(
+      "fetch",
+      stubFetch({ providers: () => okJson({ providers: [] }) }),
+    );
+    render(<App />);
+
+    await waitFor(() => {
+      const select = screen.getByLabelText(/Provider/) as HTMLSelectElement;
+      expect([...select.options].map((option) => option.value)).toEqual(["none"]);
+    });
+  });
+
+  it("surfaces an error note when the provider allowlist fails to load", async () => {
+    vi.stubGlobal(
+      "fetch",
+      stubFetch({ providers: () => errorJson(500, "server_error", "boom") }),
+    );
+    render(<App />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/Could not load provider choices/);
+    const select = screen.getByLabelText(/Provider/) as HTMLSelectElement;
+    expect([...select.options].map((option) => option.value)).toEqual(["none"]);
   });
 });

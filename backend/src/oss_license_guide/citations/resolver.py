@@ -11,7 +11,7 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass
 
-from oss_license_guide.rules.schema import ObligationClaim
+from oss_license_guide.rules.schema import Citation, ObligationClaim
 from oss_license_guide.sources.catalog import Catalog
 
 
@@ -23,34 +23,58 @@ class ResolvedSpan:
     span_index: int
     text: str
     hash: str
+    source_type: str = "spdx"
+    source_url: str = ""
+    version: str = ""
+    retrieved_at: str = ""
 
 
-def parse_source_id(source_id: str) -> str:
-    """Extract the license identifier from a source id like spdx:MIT@3.24.0."""
+def parse_source_id(source_id: str) -> tuple[str, str]:
+    """Return ``(license_id, version)`` from a source id like spdx:MIT@3.24.0.
+
+    A missing ``@version`` yields an empty version, which resolution treats as
+    invalid rather than silently matching the active catalog.
+    """
     value = source_id
     if value.startswith("spdx:"):
         value = value[len("spdx:") :]
     if "@" in value:
-        value = value.split("@", 1)[0]
-    return value
+        ident, version = value.split("@", 1)
+        return ident, version
+    return value, ""
 
 
-def resolve_span(source_id: str, span_index: int, catalog: Catalog) -> ResolvedSpan | None:
-    """Resolve and validate one citation span, returning None if invalid."""
-    record = catalog.lookup(parse_source_id(source_id))
+def resolve_span(citation: Citation, catalog: Catalog) -> ResolvedSpan | None:
+    """Resolve and validate one citation span, returning None if invalid.
+
+    Validates that the declared source version equals the active catalog
+    version, that the span exists with a matching content hash, and that the
+    citation pins the approved reviewed hash for that span.
+    """
+    identifier, version = parse_source_id(citation.source_id)
+    if not version or version != catalog.version:
+        return None
+    record = catalog.lookup(identifier)
     if record is None or record.text is None:
         return None
     for paragraph in record.paragraphs:
-        if paragraph.index != span_index:
+        if paragraph.index != citation.span_index:
             continue
         segment = record.text[paragraph.start : paragraph.end]
-        if hashlib.sha256(segment.encode("utf-8")).hexdigest() != paragraph.hash:
+        content_hash = hashlib.sha256(segment.encode("utf-8")).hexdigest()
+        if content_hash != paragraph.hash:
+            return None
+        if not citation.expected_hash or citation.expected_hash != paragraph.hash:
             return None
         return ResolvedSpan(
-            source_id=source_id,
-            span_index=span_index,
+            source_id=citation.source_id,
+            span_index=citation.span_index,
             text=segment,
             hash=paragraph.hash,
+            source_type=catalog.source_type,
+            source_url=catalog.source_url,
+            version=catalog.version,
+            retrieved_at=catalog.retrieved_at,
         )
     return None
 
@@ -64,11 +88,11 @@ def resolve_claims(
     for claim in claims:
         spans: list[ResolvedSpan] = []
         for citation in claim.citations:
-            span = resolve_span(citation.source_id, citation.span_index, catalog)
+            span = resolve_span(citation, catalog)
             if span is None:
                 errors.append(
-                    f"Claim {claim.text!r} cites missing or invalid span "
-                    f"{citation.source_id}#{citation.span_index}"
+                    f"Claim {claim.text!r} cites missing, version-mismatched, or "
+                    f"unpinned span {citation.source_id}#{citation.span_index}"
                 )
             else:
                 spans.append(span)

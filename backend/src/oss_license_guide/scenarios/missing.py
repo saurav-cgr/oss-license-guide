@@ -22,7 +22,14 @@ def missing_facts(scenario: Scenario) -> list[FactType]:
 
     distributing = scenario.known_value(FactType.DISTRIBUTION)
     if distributing is True:
-        for fact_type in (FactType.DISTRIBUTION_FORM, FactType.RECIPIENT, FactType.MODIFIED):
+        for fact_type in (
+            FactType.DISTRIBUTION_FORM,
+            FactType.RECIPIENT,
+            FactType.MODIFIED,
+            FactType.LICENSE_FILE_PRESENT,
+            FactType.COPYRIGHT_NOTICE_PRESENT,
+            FactType.NOTICE_FILE_PRESENT,
+        ):
             if not _is_known(scenario, fact_type):
                 missing.append(fact_type)
 

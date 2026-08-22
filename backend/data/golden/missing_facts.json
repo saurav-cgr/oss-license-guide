@@ -11,7 +11,10 @@
       "expect": {
         "outcome": "Insufficient information",
         "must_abstain": true,
-        "required_missing_facts": ["action", "distribution"]
+        "required_missing_facts": [
+          "action",
+          "distribution"
+        ]
       }
     },
     {
@@ -20,12 +23,16 @@
       "description": "Action provided but distribution is unknown.",
       "request": {
         "expression": "MIT",
-        "facts": { "action": "use" }
+        "facts": {
+          "action": "use"
+        }
       },
       "expect": {
         "outcome": "Insufficient information",
         "must_abstain": true,
-        "required_missing_facts": ["distribution"]
+        "required_missing_facts": [
+          "distribution"
+        ]
       }
     },
     {
@@ -34,12 +41,22 @@
       "description": "Distribution occurs but form, recipient, and modification are unknown.",
       "request": {
         "expression": "MIT",
-        "facts": { "action": "redistribute", "distribution": true }
+        "facts": {
+          "action": "redistribute",
+          "distribution": true,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": false
+        }
       },
       "expect": {
         "outcome": "Insufficient information",
         "must_abstain": true,
-        "required_missing_facts": ["distribution_form", "recipient", "modified"]
+        "required_missing_facts": [
+          "distribution_form",
+          "recipient",
+          "modified"
+        ]
       }
     },
     {
@@ -52,13 +69,18 @@
           "action": "redistribute",
           "distribution": true,
           "distribution_form": "source",
-          "recipient": "public"
+          "recipient": "public",
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": false
         }
       },
       "expect": {
         "outcome": "Insufficient information",
         "must_abstain": true,
-        "required_missing_facts": ["modified"]
+        "required_missing_facts": [
+          "modified"
+        ]
       }
     },
     {
@@ -72,13 +94,18 @@
           "distribution": true,
           "distribution_form": "binary",
           "recipient": "public",
-          "modified": false
+          "modified": false,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Insufficient information",
         "must_abstain": true,
-        "required_missing_facts": ["outbound_license"]
+        "required_missing_facts": [
+          "outbound_license"
+        ]
       }
     },
     {
@@ -87,12 +114,17 @@
       "description": "Linking requires an outbound license.",
       "request": {
         "expression": "Apache-2.0",
-        "facts": { "action": "link", "distribution": false }
+        "facts": {
+          "action": "link",
+          "distribution": false
+        }
       },
       "expect": {
         "outcome": "Insufficient information",
         "must_abstain": true,
-        "required_missing_facts": ["outbound_license"]
+        "required_missing_facts": [
+          "outbound_license"
+        ]
       }
     },
     {
@@ -101,12 +133,17 @@
       "description": "An OR expression without a selected branch.",
       "request": {
         "expression": "MIT OR Apache-2.0",
-        "facts": { "action": "use", "distribution": false }
+        "facts": {
+          "action": "use",
+          "distribution": false
+        }
       },
       "expect": {
         "outcome": "Insufficient information",
         "must_abstain": true,
-        "required_missing_facts": ["selected_branch"]
+        "required_missing_facts": [
+          "selected_branch"
+        ]
       }
     },
     {
@@ -120,13 +157,18 @@
           "distribution": true,
           "distribution_form": "source",
           "recipient": "public",
-          "modified": false
+          "modified": false,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": false
         }
       },
       "expect": {
         "outcome": "Insufficient information",
         "must_abstain": true,
-        "required_missing_facts": ["outbound_license"]
+        "required_missing_facts": [
+          "outbound_license"
+        ]
       }
     }
   ]

@@ -45,6 +45,29 @@ def test_empty_expression_returns_422() -> None:
     assert response.status_code == 422
 
 
+def test_unknown_request_field_returns_422() -> None:
+    # Server-controlled endpoints must not be influenced by client-supplied
+    # fields, so unknown request fields are rejected rather than ignored.
+    response = client().post(
+        "/api/v1/analyses",
+        json={"expression": "MIT", "facts": {}, "base_url": "https://evil.example.com"},
+    )
+    assert response.status_code == 422
+
+
+def test_bounded_question_field_is_accepted() -> None:
+    response = client().post(
+        "/api/v1/analyses",
+        json={
+            "expression": "MIT",
+            "facts": {"action": "use", "distribution": False},
+            "question": "Do I need to do anything special for internal use?",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["outcome"]
+
+
 def test_valid_request_still_succeeds() -> None:
     response = client().post(
         "/api/v1/analyses",

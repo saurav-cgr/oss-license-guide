@@ -18,6 +18,10 @@ class EvidenceEntry:
     span_index: int
     text: str
     hash: str
+    source_type: str = "spdx"
+    source_url: str = ""
+    version: str = ""
+    retrieved_at: str = ""
 
 
 @dataclass(frozen=True)
@@ -45,6 +49,13 @@ class Answer:
     missing_facts: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     rule_id: str | None = None
+    review_status: str | None = None
+    reviewer: str | None = None
+    effective_date: str | None = None
+    last_verified_at: str | None = None
+    rule_version: str | None = None
+    content_hash: str | None = None
+    permission: ClaimView | None = None
     citation_errors: list[str] = field(default_factory=list)
 
     @property

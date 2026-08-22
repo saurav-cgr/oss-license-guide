@@ -12,8 +12,8 @@ from enum import Enum
 
 from oss_license_guide.expressions.service import parse_expression
 from oss_license_guide.rules.eligibility import is_eligible
-from oss_license_guide.rules.schema import AnalysisOutcome, ObligationClaim, Rule
-from oss_license_guide.scenarios.facts import FactType
+from oss_license_guide.rules.schema import AnalysisOutcome, Citation, ObligationClaim, Rule
+from oss_license_guide.scenarios.facts import Action, FactType
 from oss_license_guide.scenarios.missing import missing_facts
 from oss_license_guide.scenarios.schema import Scenario
 
@@ -25,9 +25,16 @@ class AnalysisResult:
     outcome: AnalysisOutcome
     canonical: str
     obligations: list[ObligationClaim] = field(default_factory=list)
+    permission_citations: list[Citation] = field(default_factory=list)
     missing_facts: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     rule_id: str | None = None
+    review_status: str | None = None
+    reviewer: str | None = None
+    effective_date: str | None = None
+    last_verified_at: str | None = None
+    rule_version: str | None = None
+    content_hash: str | None = None
 
     @property
     def escalation(self) -> bool:
@@ -35,6 +42,15 @@ class AnalysisResult:
             AnalysisOutcome.NOT_SUPPORTED,
             AnalysisOutcome.REQUIRES_LEGAL_REVIEW,
         }
+
+
+# The only OR branch set with rule-backed MVP coverage.
+_SUPPORTED_OR_BRANCHES = {"MIT", "Apache-2.0"}
+
+# The only actions that may produce a substantive conclusion. Modification is
+# expressed through the ``modified`` fact under ``redistribute``; every other
+# action verb is outside the reviewed rule set and forces abstention.
+_SUPPORTED_ACTIONS = {Action.USE.value, Action.REDISTRIBUTE.value}
 
 
 def evaluate(scenario: Scenario, rules: list[Rule]) -> AnalysisResult:
@@ -49,70 +65,169 @@ def evaluate(scenario: Scenario, rules: list[Rule]) -> AnalysisResult:
         return _insufficient(canonical=scenario.expression, warnings=[message])
 
     canonical = parse_result.canonical or scenario.expression
-    target = _resolve_target(parse_result.structure, scenario)
+    parse_warnings = list(parse_result.warnings)
+
+    target = _resolve_target(parse_result.structure, scenario, canonical, parse_warnings)
     if isinstance(target, AnalysisResult):
         return target
 
     missing = [fact.value for fact in missing_facts(scenario)]
     if missing:
-        return _insufficient(canonical=canonical, missing_facts=missing)
+        return _insufficient(canonical=canonical, missing_facts=missing, warnings=parse_warnings)
+
+    consistency_warnings = _consistency_warnings(scenario)
+    if consistency_warnings:
+        return _insufficient(
+            canonical=canonical, warnings=parse_warnings + consistency_warnings
+        )
+
+    action = scenario.known_value(FactType.ACTION)
+    if action not in _SUPPORTED_ACTIONS:
+        return AnalysisResult(
+            outcome=AnalysisOutcome.REQUIRES_LEGAL_REVIEW,
+            canonical=canonical,
+            warnings=parse_warnings
+            + [f"action {action!r} is not covered by the reviewed MVP rule set"],
+        )
+
+    if scenario.known_value(FactType.OUTBOUND_LICENSE) is not None:
+        return AnalysisResult(
+            outcome=AnalysisOutcome.REQUIRES_LEGAL_REVIEW,
+            canonical=canonical,
+            warnings=parse_warnings
+            + [
+                "a stated outbound license implies a combining or relicensing "
+                "question that is outside the reviewed MVP rule set"
+            ],
+        )
 
     rule = _match_rule(target, scenario, rules)
     if rule is None:
         return AnalysisResult(
             outcome=AnalysisOutcome.REQUIRES_LEGAL_REVIEW,
             canonical=canonical,
-            warnings=[f"No reviewed rule covers {target!r} under the stated scenario"],
+            warnings=parse_warnings
+            + [f"No reviewed rule covers {target!r} under the stated scenario"],
         )
 
     return AnalysisResult(
         outcome=AnalysisOutcome(rule.outcome),
         canonical=canonical,
         obligations=list(rule.obligations),
+        permission_citations=list(rule.permission_citations),
         rule_id=rule.rule_id,
+        review_status=rule.review_status.value,
+        reviewer=rule.reviewer,
+        effective_date=rule.effective_date,
+        last_verified_at=rule.last_verified_at,
+        rule_version=rule.rule_version,
+        content_hash=rule.content_hash,
+        warnings=parse_warnings,
     )
 
 
-def _resolve_target(structure: dict, scenario: Scenario) -> str | AnalysisResult:
-    """Resolve the license whose rules should apply, handling OR branches."""
-    if structure.get("type") != "or":
-        return _collect_primary_license(structure)
+def _resolve_target(
+    structure: dict,
+    scenario: Scenario,
+    canonical: str,
+    warnings: list[str],
+) -> str | AnalysisResult:
+    """Resolve the license whose rules apply, supporting only exact shapes.
 
-    branches = _collect_license_ids(structure)
+    Only a single license and ``MIT OR Apache-2.0`` are evaluated. AND, WITH,
+    grouping, and any OR branch that is not a plain license cause abstention.
+    Selected branches are compared by their canonical form so deprecated
+    spellings do not spuriously fail. Every OR set other than exactly
+    {MIT, Apache-2.0} is rejected even when a selected branch is supported.
+    """
+    branches = _supported_branches(structure)
+    if branches is None:
+        return AnalysisResult(
+            outcome=AnalysisOutcome.REQUIRES_LEGAL_REVIEW,
+            canonical=canonical,
+            warnings=warnings + ["Only single-license and flat OR expressions are supported"],
+        )
+    if len(branches) == 1:
+        return _canonical_id(branches[0])
+
+    canonical_branches = {_canonical_id(branch) for branch in branches}
+    if canonical_branches != _SUPPORTED_OR_BRANCHES:
+        return AnalysisResult(
+            outcome=AnalysisOutcome.REQUIRES_LEGAL_REVIEW,
+            canonical=canonical,
+            warnings=warnings
+            + [
+                "OR expression outside the reviewed MVP coverage "
+                "(only MIT OR Apache-2.0 is rule-backed)"
+            ],
+        )
+
     selected = scenario.known_value(FactType.SELECTED_BRANCH)
     if selected is None:
         return _insufficient(
-            canonical=scenario.expression,
+            canonical=canonical,
             missing_facts=[FactType.SELECTED_BRANCH.value],
+            warnings=warnings,
         )
-    if selected not in branches:
+    selected_canonical = _canonical_id(selected)
+    if selected_canonical not in canonical_branches:
         return _insufficient(
-            canonical=scenario.expression,
-            warnings=[f"{selected!r} is not a branch of {scenario.expression!r}"],
+            canonical=canonical,
+            warnings=warnings
+            + [f"{selected!r} is not a branch of {scenario.expression!r}"],
         )
-    return selected
+    return selected_canonical
 
 
-def _collect_primary_license(structure: dict) -> str:
-    ids = _collect_license_ids(structure)
-    return ids[0] if ids else ""
+def _supported_branches(structure: dict) -> list[str] | None:
+    """Return raw license ids for a supported shape, else None to abstain."""
+    node = _strip_groups(structure)
+    if node["type"] == "license":
+        return [node["id"]]
+    if node["type"] != "or":
+        return None
+    return _pure_or_branches(node)
 
 
-def _collect_license_ids(structure: dict) -> list[str]:
-    ids: list[str] = []
+def _strip_groups(node: dict) -> dict:
+    """Remove redundant grouping that wraps an entire expression."""
+    while node.get("type") == "group":
+        node = node["inner"]
+    return node
 
-    def walk(node: dict) -> None:
-        node_type = node.get("type")
-        if node_type == "license":
-            ids.append(node["id"])
-        else:
-            for key in ("left", "right", "base", "inner"):
-                child = node.get(key)
-                if isinstance(child, dict):
-                    walk(child)
 
-    walk(structure)
-    return ids
+def _pure_or_branches(node: dict) -> list[str] | None:
+    """Return all license ids if ``node`` is a pure OR tree of direct licenses."""
+    node = _strip_groups(node)
+    if node["type"] == "license":
+        return [node["id"]]
+    if node["type"] != "or":
+        return None
+    left = _pure_or_branches(node["left"])
+    right = _pure_or_branches(node["right"])
+    if left is None or right is None:
+        return None
+    return left + right
+
+
+def _canonical_id(identifier: str) -> str:
+    """Return the canonical form of a single license identifier."""
+    parsed = parse_expression(identifier)
+    if parsed.ok and parsed.canonical:
+        return parsed.canonical
+    return identifier
+
+
+def _consistency_warnings(scenario: Scenario) -> list[str]:
+    """Return warnings for materially contradictory action/distribution facts."""
+    action = scenario.known_value(FactType.ACTION)
+    distribution = scenario.known_value(FactType.DISTRIBUTION)
+    warnings: list[str] = []
+    if action == Action.USE.value and distribution is True:
+        warnings.append("action 'use' conflicts with distribution=true")
+    if action == Action.REDISTRIBUTE.value and distribution is False:
+        warnings.append("action 'redistribute' conflicts with distribution=false")
+    return warnings
 
 
 def _match_rule(target: str, scenario: Scenario, rules: list[Rule]) -> Rule | None:

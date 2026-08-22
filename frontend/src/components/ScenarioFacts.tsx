@@ -159,6 +159,24 @@ export function ScenarioFacts({ value, onChange }: ScenarioFactsProps) {
               value={value.modified}
               onValue={(v) => set({ modified: v })}
             />
+            <TriStateField
+              id="fact-license-file"
+              label="Is the license text included in the distribution?"
+              value={value.license_file_present}
+              onValue={(v) => set({ license_file_present: v })}
+            />
+            <TriStateField
+              id="fact-copyright-notice"
+              label="Is the original copyright notice retained?"
+              value={value.copyright_notice_present}
+              onValue={(v) => set({ copyright_notice_present: v })}
+            />
+            <TriStateField
+              id="fact-notice-file"
+              label="Is a NOTICE file included if present?"
+              value={value.notice_file_present}
+              onValue={(v) => set({ notice_file_present: v })}
+            />
           </>
         )}
         <TextField

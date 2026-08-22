@@ -3,7 +3,20 @@ services:
     build:
       context: ./backend
     environment:
+      # Forward every supported OLG_* setting from the host environment (or a
+      # .env file) so provider allowlist, endpoints, limits, and development-key
+      # settings reach the API container. Unset variables fall back to backend
+      # defaults. Never commit secret values; provide them via .env.
       OLG_CORS_ORIGINS: ${OLG_CORS_ORIGINS:-}
+      OLG_PROVIDERS_ENABLED: ${OLG_PROVIDERS_ENABLED:-gemini,openai}
+      OLG_GEMINI_ENDPOINT: ${OLG_GEMINI_ENDPOINT:-https://generativelanguage.googleapis.com/v1beta}
+      OLG_OPENAI_ENDPOINT: ${OLG_OPENAI_ENDPOINT:-https://api.openai.com/v1}
+      OLG_GEMINI_API_KEY: ${OLG_GEMINI_API_KEY:-}
+      OLG_ALLOW_DEV_PROVIDER_KEY: ${OLG_ALLOW_DEV_PROVIDER_KEY:-false}
+      OLG_PROVIDER_TIMEOUT_SECONDS: ${OLG_PROVIDER_TIMEOUT_SECONDS:-10}
+      OLG_PROVIDER_MAX_TOKENS: ${OLG_PROVIDER_MAX_TOKENS:-600}
+      OLG_PROVIDER_MAX_REPAIRS: ${OLG_PROVIDER_MAX_REPAIRS:-1}
+      OLG_PROVIDER_MAX_OUTPUT_CHARS: ${OLG_PROVIDER_MAX_OUTPUT_CHARS:-2000}
     # The API is reachable only within the compose network through the web
     # reverse proxy. No port is published to the host.
     expose:

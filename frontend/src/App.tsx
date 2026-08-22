@@ -19,7 +19,7 @@ export function App() {
         Informational only, not legal advice.
       </p>
       <HealthStatus state={health} />
-      <AnalysisForm state={analysis.state} onRun={analysis.run} />
+      <AnalysisForm client={apiClient} state={analysis.state} onRun={analysis.run} />
       {analysis.state.status === "success" && <AnalysisResult result={analysis.state.result} />}
     </main>
   );

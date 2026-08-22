@@ -9,6 +9,9 @@ export interface FactsInput {
   modified?: boolean;
   outbound_license?: string;
   selected_branch?: string;
+  license_file_present?: boolean;
+  copyright_notice_present?: boolean;
+  notice_file_present?: boolean;
 }
 
 /** The full analysis request submitted to the API boundary. */
@@ -25,11 +28,26 @@ export interface CitationDto {
   span_index: number;
   text: string;
   hash: string;
+  source_type: string;
+  source_url: string;
+  version: string;
+  retrieved_at: string;
 }
 
 export interface ClaimDto {
   text: string;
   citations: CitationDto[];
+}
+
+/** Rule provenance surfaced to the client, never described as legal review. */
+export interface RuleReviewDto {
+  rule_id: string;
+  review_status: string;
+  reviewer: string;
+  effective_date: string;
+  last_verified_at: string;
+  rule_version: string;
+  content_hash: string;
 }
 
 export interface AnalysisResponse {
@@ -38,6 +56,7 @@ export interface AnalysisResponse {
   short_answer: string;
   assumptions: string[];
   obligations: ClaimDto[];
+  permission: ClaimDto | null;
   what_could_change: string[];
   evidence: CitationDto[];
   confidence: Record<string, string>;
@@ -46,6 +65,7 @@ export interface AnalysisResponse {
   missing_facts: string[];
   warnings: string[];
   rule_id: string | null;
+  rule: RuleReviewDto | null;
   citation_errors: string[];
   blocked: boolean;
   rendered: string;

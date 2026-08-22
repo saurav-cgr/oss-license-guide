@@ -3,128 +3,259 @@
     {
       "rule_id": "apache-internal-use",
       "license_expression_pattern": "Apache-2.0",
-      "scenario_preconditions": { "distribution": false },
+      "scenario_preconditions": {
+        "distribution": false
+      },
       "outcome": "Likely permitted under stated assumptions",
       "obligations": [],
       "exceptions": [],
       "direction": "Apache-2.0 component used internally without external distribution",
-      "source_ids": ["spdx:Apache-2.0@3.24.0"],
+      "source_ids": [
+        "spdx:Apache-2.0@3.24.0"
+      ],
       "review_status": "maintainer_reviewed",
       "reviewer": "maintainer",
       "effective_date": "2026-08-21",
-      "last_verified_at": "2026-08-21"
+      "last_verified_at": "2026-08-21",
+      "permission_citations": [
+        {
+          "source_id": "spdx:Apache-2.0@3.24.0",
+          "span_index": 13,
+          "expected_hash": "3b6f262d039f6e6dcf7f661a9709190ff547f35e422cbbdb013d707c8ad862b2"
+        }
+      ]
     },
     {
       "rule_id": "apache-distribute-source-unmodified",
       "license_expression_pattern": "Apache-2.0",
-      "scenario_preconditions": { "distribution": true, "distribution_form": "source", "modified": false },
+      "scenario_preconditions": {
+        "distribution": true,
+        "distribution_form": "source",
+        "modified": false
+      },
       "outcome": "Permitted with listed obligations",
       "obligations": [
         {
           "text": "Provide a copy of the Apache-2.0 license",
-          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 }]
+          "citations": [
+            {
+              "source_id": "spdx:Apache-2.0@3.24.0",
+              "span_index": 16,
+              "expected_hash": "702b18fda24efb8b14422aedf8ef5f0af9cb02019321215805db2d59c8b7dd30"
+            }
+          ]
         },
         {
           "text": "Include the NOTICE file if one is present",
-          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 }]
+          "citations": [
+            {
+              "source_id": "spdx:Apache-2.0@3.24.0",
+              "span_index": 19,
+              "expected_hash": "d9c23a46b47ba28eed346c87536a949c3208c1b510f77e97d779ba68270fe042"
+            }
+          ]
         },
         {
           "text": "Retain any copyright, patent, trademark, and attribution notices",
-          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }]
+          "citations": [
+            {
+              "source_id": "spdx:Apache-2.0@3.24.0",
+              "span_index": 18,
+              "expected_hash": "ce26c501719059da88617e1a1ee2dd62659f158589addd3a66bede9ef0b022b7"
+            }
+          ]
         }
       ],
       "exceptions": [],
       "direction": "Apache-2.0 component redistributed in source form, unmodified",
-      "source_ids": ["spdx:Apache-2.0@3.24.0"],
+      "source_ids": [
+        "spdx:Apache-2.0@3.24.0"
+      ],
       "review_status": "maintainer_reviewed",
       "reviewer": "maintainer",
       "effective_date": "2026-08-21",
-      "last_verified_at": "2026-08-21"
+      "last_verified_at": "2026-08-21",
+      "permission_citations": [
+        {
+          "source_id": "spdx:Apache-2.0@3.24.0",
+          "span_index": 13,
+          "expected_hash": "3b6f262d039f6e6dcf7f661a9709190ff547f35e422cbbdb013d707c8ad862b2"
+        }
+      ]
     },
     {
       "rule_id": "apache-distribute-binary-unmodified",
       "license_expression_pattern": "Apache-2.0",
-      "scenario_preconditions": { "distribution": true, "distribution_form": "binary", "modified": false },
+      "scenario_preconditions": {
+        "distribution": true,
+        "distribution_form": "binary",
+        "modified": false
+      },
       "outcome": "Permitted with listed obligations",
       "obligations": [
         {
           "text": "Provide a copy of the Apache-2.0 license in the distribution",
-          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 }]
+          "citations": [
+            {
+              "source_id": "spdx:Apache-2.0@3.24.0",
+              "span_index": 16,
+              "expected_hash": "702b18fda24efb8b14422aedf8ef5f0af9cb02019321215805db2d59c8b7dd30"
+            }
+          ]
         },
         {
           "text": "Include the NOTICE file if one is present",
-          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 }]
-        },
-        {
-          "text": "Retain any copyright, patent, trademark, and attribution notices",
-          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }]
+          "citations": [
+            {
+              "source_id": "spdx:Apache-2.0@3.24.0",
+              "span_index": 19,
+              "expected_hash": "d9c23a46b47ba28eed346c87536a949c3208c1b510f77e97d779ba68270fe042"
+            }
+          ]
         }
       ],
       "exceptions": [],
       "direction": "Apache-2.0 component redistributed in binary form, unmodified",
-      "source_ids": ["spdx:Apache-2.0@3.24.0"],
+      "source_ids": [
+        "spdx:Apache-2.0@3.24.0"
+      ],
       "review_status": "maintainer_reviewed",
       "reviewer": "maintainer",
       "effective_date": "2026-08-21",
-      "last_verified_at": "2026-08-21"
+      "last_verified_at": "2026-08-21",
+      "permission_citations": [
+        {
+          "source_id": "spdx:Apache-2.0@3.24.0",
+          "span_index": 13,
+          "expected_hash": "3b6f262d039f6e6dcf7f661a9709190ff547f35e422cbbdb013d707c8ad862b2"
+        }
+      ]
     },
     {
       "rule_id": "apache-distribute-source-modified",
       "license_expression_pattern": "Apache-2.0",
-      "scenario_preconditions": { "distribution": true, "distribution_form": "source", "modified": true },
+      "scenario_preconditions": {
+        "distribution": true,
+        "distribution_form": "source",
+        "modified": true
+      },
       "outcome": "Permitted with listed obligations",
       "obligations": [
         {
           "text": "Provide a copy of the Apache-2.0 license",
-          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 }]
+          "citations": [
+            {
+              "source_id": "spdx:Apache-2.0@3.24.0",
+              "span_index": 16,
+              "expected_hash": "702b18fda24efb8b14422aedf8ef5f0af9cb02019321215805db2d59c8b7dd30"
+            }
+          ]
         },
         {
           "text": "Include the NOTICE file if one is present",
-          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 }]
+          "citations": [
+            {
+              "source_id": "spdx:Apache-2.0@3.24.0",
+              "span_index": 19,
+              "expected_hash": "d9c23a46b47ba28eed346c87536a949c3208c1b510f77e97d779ba68270fe042"
+            }
+          ]
         },
         {
           "text": "Retain and clearly mark any modified files",
-          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 17 }]
+          "citations": [
+            {
+              "source_id": "spdx:Apache-2.0@3.24.0",
+              "span_index": 17,
+              "expected_hash": "2fbc57d4359ed86054d8b5c5ac432604b1877845562c8266039e51826bcd13c4"
+            }
+          ]
         },
         {
           "text": "Retain any copyright, patent, trademark, and attribution notices",
-          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }]
+          "citations": [
+            {
+              "source_id": "spdx:Apache-2.0@3.24.0",
+              "span_index": 18,
+              "expected_hash": "ce26c501719059da88617e1a1ee2dd62659f158589addd3a66bede9ef0b022b7"
+            }
+          ]
         }
       ],
       "exceptions": [],
       "direction": "Apache-2.0 component redistributed in source form, modified",
-      "source_ids": ["spdx:Apache-2.0@3.24.0"],
+      "source_ids": [
+        "spdx:Apache-2.0@3.24.0"
+      ],
       "review_status": "maintainer_reviewed",
       "reviewer": "maintainer",
       "effective_date": "2026-08-21",
-      "last_verified_at": "2026-08-21"
+      "last_verified_at": "2026-08-21",
+      "permission_citations": [
+        {
+          "source_id": "spdx:Apache-2.0@3.24.0",
+          "span_index": 13,
+          "expected_hash": "3b6f262d039f6e6dcf7f661a9709190ff547f35e422cbbdb013d707c8ad862b2"
+        }
+      ]
     },
     {
       "rule_id": "apache-distribute-binary-modified",
       "license_expression_pattern": "Apache-2.0",
-      "scenario_preconditions": { "distribution": true, "distribution_form": "binary", "modified": true },
+      "scenario_preconditions": {
+        "distribution": true,
+        "distribution_form": "binary",
+        "modified": true
+      },
       "outcome": "Permitted with listed obligations",
       "obligations": [
         {
           "text": "Provide a copy of the Apache-2.0 license in the distribution",
-          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 }]
+          "citations": [
+            {
+              "source_id": "spdx:Apache-2.0@3.24.0",
+              "span_index": 16,
+              "expected_hash": "702b18fda24efb8b14422aedf8ef5f0af9cb02019321215805db2d59c8b7dd30"
+            }
+          ]
         },
         {
           "text": "Include the NOTICE file if one is present",
-          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 }]
+          "citations": [
+            {
+              "source_id": "spdx:Apache-2.0@3.24.0",
+              "span_index": 19,
+              "expected_hash": "d9c23a46b47ba28eed346c87536a949c3208c1b510f77e97d779ba68270fe042"
+            }
+          ]
         },
         {
-          "text": "Retain any copyright, patent, trademark, and attribution notices",
-          "citations": [{ "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }]
+          "text": "Retain and clearly mark any modified files",
+          "citations": [
+            {
+              "source_id": "spdx:Apache-2.0@3.24.0",
+              "span_index": 17,
+              "expected_hash": "2fbc57d4359ed86054d8b5c5ac432604b1877845562c8266039e51826bcd13c4"
+            }
+          ]
         }
       ],
       "exceptions": [],
       "direction": "Apache-2.0 component redistributed in binary form, modified",
-      "source_ids": ["spdx:Apache-2.0@3.24.0"],
+      "source_ids": [
+        "spdx:Apache-2.0@3.24.0"
+      ],
       "review_status": "maintainer_reviewed",
       "reviewer": "maintainer",
       "effective_date": "2026-08-21",
-      "last_verified_at": "2026-08-21"
+      "last_verified_at": "2026-08-21",
+      "permission_citations": [
+        {
+          "source_id": "spdx:Apache-2.0@3.24.0",
+          "span_index": 13,
+          "expected_hash": "3b6f262d039f6e6dcf7f661a9709190ff547f35e422cbbdb013d707c8ad862b2"
+        }
+      ]
     }
   ]
 }

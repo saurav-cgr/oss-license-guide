@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from functools import lru_cache
 from pathlib import Path
@@ -37,6 +38,7 @@ def _rule_from_dict(entry: dict) -> Rule:
         scenario_preconditions=entry.get("scenario_preconditions", {}),
         outcome=entry.get("outcome", ""),
         obligations=_obligations_from_dict(entry.get("obligations", [])),
+        permission_citations=_citations_from_dict(entry.get("permission_citations", [])),
         exceptions=entry.get("exceptions", []),
         direction=entry.get("direction", ""),
         source_ids=entry.get("source_ids", []),
@@ -44,7 +46,23 @@ def _rule_from_dict(entry: dict) -> Rule:
         reviewer=entry.get("reviewer", ""),
         effective_date=entry.get("effective_date", ""),
         last_verified_at=entry.get("last_verified_at", ""),
+        rule_version=entry.get("rule_version", ""),
+        content_hash=_content_hash(entry),
     )
+
+
+def _content_hash(entry: dict) -> str:
+    """Return a stable content hash identifying this exact rule revision.
+
+    The hash covers the full rule record except any pre-existing
+    ``content_hash`` key, using canonical (sorted-key) JSON so the same logical
+    rule always hashes identically regardless of formatting or key order.
+    """
+    payload = {key: value for key, value in entry.items() if key != "content_hash"}
+    canonical = json.dumps(
+        payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def _obligations_from_dict(items: list[dict]) -> list[ObligationClaim]:
@@ -53,9 +71,21 @@ def _obligations_from_dict(items: list[dict]) -> list[ObligationClaim]:
         if isinstance(item, str):
             claims.append(ObligationClaim(text=item))
             continue
-        citations = [
-            Citation(source_id=cite["source_id"], span_index=cite["span_index"])
-            for cite in item.get("citations", [])
-        ]
-        claims.append(ObligationClaim(text=item["text"], citations=citations))
+        claims.append(
+            ObligationClaim(
+                text=item["text"],
+                citations=_citations_from_dict(item.get("citations", [])),
+            )
+        )
     return claims
+
+
+def _citations_from_dict(items: list[dict]) -> list[Citation]:
+    return [
+        Citation(
+            source_id=cite["source_id"],
+            span_index=cite["span_index"],
+            expected_hash=cite.get("expected_hash", ""),
+        )
+        for cite in items
+    ]

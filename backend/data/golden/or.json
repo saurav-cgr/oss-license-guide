@@ -6,7 +6,11 @@
       "description": "MIT OR Apache-2.0 with the MIT branch selected, internal use.",
       "request": {
         "expression": "MIT OR Apache-2.0",
-        "facts": { "action": "use", "distribution": false, "selected_branch": "MIT" }
+        "facts": {
+          "action": "use",
+          "distribution": false,
+          "selected_branch": "MIT"
+        }
       },
       "expect": {
         "outcome": "Likely permitted under stated assumptions",
@@ -25,15 +29,33 @@
           "distribution_form": "source",
           "recipient": "public",
           "modified": false,
-          "selected_branch": "MIT"
+          "selected_branch": "MIT",
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
-          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+          {
+            "text": "Include the MIT license text",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "included",
+              "copies"
+            ]
+          },
+          {
+            "text": "Retain the original copyright notice",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "copyright notice"
+            ]
+          }
         ]
       }
     },
@@ -43,7 +65,11 @@
       "description": "MIT OR Apache-2.0 with the Apache branch selected, internal use.",
       "request": {
         "expression": "MIT OR Apache-2.0",
-        "facts": { "action": "use", "distribution": false, "selected_branch": "Apache-2.0" }
+        "facts": {
+          "action": "use",
+          "distribution": false,
+          "selected_branch": "Apache-2.0"
+        }
       },
       "expect": {
         "outcome": "Likely permitted under stated assumptions",
@@ -62,17 +88,36 @@
           "distribution_form": "source",
           "recipient": "public",
           "modified": true,
-          "selected_branch": "Apache-2.0"
+          "selected_branch": "Apache-2.0",
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Provide a copy of the Apache-2.0 license", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "text": "Retain and clearly mark any modified files", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 17 },
-          { "text": "Include the NOTICE file if one is present", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "text": "Retain any copyright, patent, trademark, and attribution notices", "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "text": "Provide a copy of the Apache-2.0 license",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "text": "Retain and clearly mark any modified files",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 17
+          },
+          {
+            "text": "Include the NOTICE file if one is present",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          },
+          {
+            "text": "Retain any copyright, patent, trademark, and attribution notices",
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 18
+          }
         ]
       }
     },
@@ -82,12 +127,17 @@
       "description": "MIT OR Apache-2.0 with no branch selected must ask which branch applies.",
       "request": {
         "expression": "MIT OR Apache-2.0",
-        "facts": { "action": "use", "distribution": false }
+        "facts": {
+          "action": "use",
+          "distribution": false
+        }
       },
       "expect": {
         "outcome": "Insufficient information",
         "must_abstain": true,
-        "required_missing_facts": ["selected_branch"]
+        "required_missing_facts": [
+          "selected_branch"
+        ]
       }
     }
   ]

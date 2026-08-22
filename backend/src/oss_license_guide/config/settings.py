@@ -5,7 +5,9 @@ provider credentials are handled in request memory elsewhere.
 """
 
 from functools import lru_cache
+from urllib.parse import urlsplit
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -43,6 +45,47 @@ class Settings(BaseSettings):
     provider_max_tokens: int = 600
     provider_max_repairs: int = 1
     provider_max_output_chars: int = 2000
+
+    @field_validator(
+        "allow_dev_provider_key",
+        "provider_timeout_seconds",
+        "provider_max_tokens",
+        "provider_max_repairs",
+        "provider_max_output_chars",
+        "gemini_endpoint",
+        "openai_endpoint",
+        mode="before",
+    )
+    @classmethod
+    def _empty_env_uses_default(cls, value: object, info) -> object:
+        """Treat an empty-string env value as unset.
+
+        Compose and .env files commonly forward variables with empty defaults
+        (``${VAR:-}``); without this, an empty string fails boolean/numeric
+        parsing (or, for endpoints, HTTPS validation) and prevents the API from
+        starting.
+        """
+        if value == "":
+            return cls.model_fields[info.field_name].default
+        return value
+
+    @field_validator("gemini_endpoint", "openai_endpoint")
+    @classmethod
+    def _endpoint_uses_https(cls, value: str, info) -> str:
+        """Require HTTPS provider endpoints except approved localhost dev targets.
+
+        A plaintext HTTP endpoint would transport API keys unencrypted. Only
+        localhost/loopback development endpoints may use ``http``.
+        """
+        parsed = urlsplit(value)
+        host = (parsed.hostname or "").lower()
+        local = host in {"localhost", "127.0.0.1", "::1"}
+        if parsed.scheme != "https" and not local:
+            raise ValueError(
+                f"{info.field_name} must use https unless it targets a "
+                "localhost development endpoint"
+            )
+        return value
 
     @property
     def allowed_cors_origins(self) -> list[str]:

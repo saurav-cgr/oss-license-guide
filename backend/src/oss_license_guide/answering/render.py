@@ -24,6 +24,17 @@ def render(answer: Answer) -> str:
         lines.append("Assumptions:")
         lines.extend(f"- {assumption}" for assumption in answer.assumptions or ["None stated"])
 
+        lines.append("Permissions:")
+        if answer.permission is not None:
+            refs = ", ".join(
+                f"{c.source_id} span {c.span_index}" for c in answer.permission.citations
+            )
+            lines.append(
+                f"- {answer.permission.text}" + (f" ({refs})" if refs else " (no citation)")
+            )
+        else:
+            lines.append("- None")
+
         lines.append("Obligations:")
         if answer.obligations:
             for claim in answer.obligations:

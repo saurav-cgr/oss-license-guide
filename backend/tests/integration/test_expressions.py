@@ -80,6 +80,14 @@ def test_invalid_expressions_return_diagnostics(client: TestClient) -> None:
         assert body["canonical"] is None
 
 
+def test_oversized_expression_returns_422(client: TestClient) -> None:
+    response = client.post(
+        "/api/v1/expressions/parse",
+        json={"expression": "A" * 501},
+    )
+    assert response.status_code == 422
+
+
 def test_and_binds_tighter_than_or(client: TestClient) -> None:
     body = parse(client, "MIT OR Apache-2.0 AND GPL-3.0-only")
     assert body["valid"] is True

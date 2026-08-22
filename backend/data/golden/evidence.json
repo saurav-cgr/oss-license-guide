@@ -11,15 +11,24 @@
           "distribution": true,
           "distribution_form": "source",
           "recipient": "public",
-          "modified": false
+          "modified": false,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": false
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "required_citations": [
-          { "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
-          { "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+          {
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 2
+          },
+          {
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3
+          }
         ]
       }
     },
@@ -34,33 +43,56 @@
           "distribution": true,
           "distribution_form": "source",
           "recipient": "public",
-          "modified": true
+          "modified": true,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": true
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "required_citations": [
-          { "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 16 },
-          { "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 17 },
-          { "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 19 },
-          { "source_id": "spdx:Apache-2.0@3.24.0", "span_index": 18 }
+          {
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 16
+          },
+          {
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 17
+          },
+          {
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 19
+          },
+          {
+            "source_id": "spdx:Apache-2.0@3.24.0",
+            "span_index": 18
+          }
         ]
       }
     },
     {
       "case_id": "evidence-mit-internal-no-claims-003",
       "category": "conflicting_or_missing_evidence",
-      "description": "Internal use emits no obligations and no fabricated evidence.",
+      "description": "Internal use emits no obligations but carries the permission-grant span as supporting evidence.",
       "request": {
         "expression": "MIT",
-        "facts": { "action": "use", "distribution": false }
+        "facts": {
+          "action": "use",
+          "distribution": false
+        }
       },
       "expect": {
         "outcome": "Likely permitted under stated assumptions",
         "must_abstain": false,
         "no_obligations": true,
-        "no_evidence": true
+        "required_citations": [
+          {
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 2
+          }
+        ]
       }
     },
     {
@@ -69,12 +101,16 @@
       "description": "An abstention for missing facts emits no fabricated obligations or evidence.",
       "request": {
         "expression": "MIT",
-        "facts": { "action": "use" }
+        "facts": {
+          "action": "use"
+        }
       },
       "expect": {
         "outcome": "Insufficient information",
         "must_abstain": true,
-        "required_missing_facts": ["distribution"],
+        "required_missing_facts": [
+          "distribution"
+        ],
         "no_obligations": true,
         "no_evidence": true
       }

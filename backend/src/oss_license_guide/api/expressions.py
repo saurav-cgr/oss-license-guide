@@ -6,12 +6,16 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from oss_license_guide.expressions.service import parse_expression
+from oss_license_guide.safety import MAX_EXPRESSION_LENGTH
 
 router = APIRouter(prefix="/expressions", tags=["expressions"])
 
 
 class ParseRequest(BaseModel):
-    expression: str = Field(..., description="SPDX license expression to parse")
+    expression: str = Field(
+        ..., max_length=MAX_EXPRESSION_LENGTH,
+        description="SPDX license expression to parse",
+    )
 
 
 class SpanModel(BaseModel):

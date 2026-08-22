@@ -1,5 +1,6 @@
 # Build stage: resolve dependencies and install the package with uv.
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
+# Base images are pinned by digest for reproducible production builds.
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim@sha256:e5b65587bce7de595f299855d7385fe7fca39b8a74baa261ba1b7147afa78e58 AS builder
 
 WORKDIR /app
 
@@ -12,7 +13,7 @@ COPY src ./src
 RUN uv sync --frozen --no-dev
 
 # Runtime stage: minimal image with no build tooling or secrets.
-FROM python:3.12-slim AS runtime
+FROM python:3.12-slim@sha256:2c941e860699f878900b0edc2403613c234d4b32eda3cc9fa7036991a2a63c4a AS runtime
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \

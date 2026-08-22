@@ -12,9 +12,10 @@ product, and this notice is not legal advice.
 - **Raw queries and answers** are processed in memory for the duration of a
   request and are **not retained** by the application after the response.
 - **User-supplied model-provider keys** are held only in browser memory (React
-  state) and backend request memory. They are never written to storage,
-  cookies, URLs, logs, or analytics, and are cleared when the page reloads or
-  the request ends.
+  component state) and backend request memory. They are never written to
+  storage, cookies, URLs, logs, or analytics. The browser copy is retained in
+  component state until you edit it or reload the page; the backend copy exists
+  only for the duration of the request.
 
 ## What is processed by third parties
 
@@ -34,8 +35,12 @@ selected providers first.
 
 ## Data use
 
-User content is **not** used to train models. No model provider is granted
-training rights by this application.
+Content sent to a model provider is processed under that provider's terms, which
+differ by provider and may change over time. This application does not itself
+train models on your content, but it cannot guarantee that every configured
+compatible provider will not use submitted content for training. Review the
+selected provider's data-use and training policies before use, and only submit
+content you are comfortable sharing with that provider.
 
 ## Before public deployment
 

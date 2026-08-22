@@ -64,8 +64,20 @@ log "Running one complete deterministic analysis through the proxy"
 ANALYSIS="$(curl -fsS -X POST "$WEB_URL/api/v1/analyses" \
   -H 'Content-Type: application/json' \
   -d '{"expression":"MIT","facts":{"action":"use","distribution":false}}')"
-if ! echo "$ANALYSIS" | grep -q '"outcome"'; then
-  echo "ERROR: analysis did not return an outcome" >&2
+if ! echo "$ANALYSIS" | grep -q '"outcome":"Likely permitted under stated assumptions"'; then
+  echo "ERROR: analysis did not return the expected permission outcome" >&2
+  exit 1
+fi
+if ! echo "$ANALYSIS" | grep -q '"rule_id":"mit-internal-use"'; then
+  echo "ERROR: analysis did not select the internal-use rule" >&2
+  exit 1
+fi
+if ! echo "$ANALYSIS" | grep -q '"blocked":false'; then
+  echo "ERROR: analysis was unexpectedly blocked" >&2
+  exit 1
+fi
+if ! echo "$ANALYSIS" | grep -Fq '"evidence":[{"source_id":"spdx:MIT@3.24.0"'; then
+  echo "ERROR: analysis did not return the required supporting evidence" >&2
   exit 1
 fi
 
@@ -76,8 +88,10 @@ if echo "$ANALYSIS$HEALTH" | grep -qEi 'sk-[A-Za-z0-9]{10,}|AIza[0-9A-Za-z]{20}|
 fi
 
 log "Confirming only the web endpoint is published to the host"
-PUBLISHED="$(docker ps --format '{{.Ports}}' | grep -c '8080->' || true)"
-API_PUBLISHED="$(docker ps --format '{{.Ports}}' | grep -c '8000->' || true)"
+# Inspect only this Compose project's containers (not global docker ps).
+PROJECT_PORTS="$($COMPOSE ps --format '{{.Ports}}')"
+PUBLISHED="$(echo "$PROJECT_PORTS" | grep -c '8080->' || true)"
+API_PUBLISHED="$(echo "$PROJECT_PORTS" | grep -c '8000->' || true)"
 if [ "$PUBLISHED" -lt 1 ] || [ "$API_PUBLISHED" -ne 0 ]; then
   echo "ERROR: expected only the web port published; api published count=$API_PUBLISHED" >&2
   exit 1

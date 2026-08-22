@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any
 
@@ -20,6 +21,37 @@ from oss_license_guide.providers.protocol import (
 )
 
 _REDACTED = "[REDACTED]"
+
+
+def _origin(url: str) -> tuple[str, str, int | None]:
+    """Return the (scheme, hostname, port) origin of ``url``."""
+    parsed = urllib.parse.urlsplit(url)
+    return parsed.scheme, (parsed.hostname or "").lower(), parsed.port
+
+
+class _SameOriginRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Follow only same-origin redirects; refuse credential-carrying hops.
+
+    A cross-origin redirect would let a different host (or a plaintext
+    downgrade) receive the ``Authorization`` or ``x-goog-api-key`` header
+    copied onto the redirected request. Refusing such redirects prevents that
+    credential leak while still allowing same-origin moves.
+    """
+
+    def redirect_request(
+        self,
+        req: urllib.request.Request,
+        fp: Any,
+        code: int,
+        msg: str,
+        headers: Any,
+        newurl: str,
+    ) -> Any:
+        if _origin(req.full_url) != _origin(newurl):
+            raise ProviderUnavailableError(
+                "Provider redirected to a different origin; refusing to forward credentials"
+            )
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 class HttpResponse:
@@ -46,16 +78,18 @@ def post_json(
 ) -> HttpResponse:
     """POST a JSON payload and return the response.
 
-    Raises a provider error subclass for auth, rate-limit, timeout, and
-    transport failures. The caller is responsible for supplying only the
-    configured, server-controlled ``url``.
+    Header credentials (for example ``Authorization`` or ``x-goog-api-key``)
+    are sent on the wire so provider authentication actually works. Secrets
+    are never echoed: error messages derive from the response body only and are
+    truncated. The caller is responsible for supplying only the configured,
+    server-controlled ``url``.
     """
     data = json.dumps(payload).encode("utf-8")
-    safe_headers = {key: value for key, value in headers.items() if key.lower() != "authorization"}
-    request = urllib.request.Request(url, data=data, headers=safe_headers, method="POST")
+    request = urllib.request.Request(url, data=data, headers=headers, method="POST")
+    opener = urllib.request.build_opener(_SameOriginRedirectHandler())
 
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
+        with opener.open(request, timeout=timeout) as response:
             return HttpResponse(response.status, response.read())
     except urllib.error.HTTPError as error:
         body = error.read()

@@ -36,6 +36,9 @@ def test_mit_source_distribution_unmodified_has_obligations(client: TestClient) 
             "distribution_form": "source",
             "recipient": "public",
             "modified": False,
+            "license_file_present": True,
+            "copyright_notice_present": True,
+            "notice_file_present": False,
         },
     )
     assert body["outcome"] == "Permitted with listed obligations"
@@ -53,6 +56,9 @@ def test_apache_binary_distribution_modified_has_obligations(client: TestClient)
             "distribution_form": "binary",
             "recipient": "customers",
             "modified": True,
+            "license_file_present": True,
+            "copyright_notice_present": True,
+            "notice_file_present": True,
         },
     )
     assert body["outcome"] == "Permitted with listed obligations"
@@ -70,6 +76,9 @@ def test_evidence_is_included_with_hashes(client: TestClient) -> None:
             "distribution_form": "binary",
             "recipient": "customers",
             "modified": True,
+            "license_file_present": True,
+            "copyright_notice_present": True,
+            "notice_file_present": True,
         },
     )
     assert body["evidence"], "expected evidence entries"
@@ -107,6 +116,101 @@ def test_or_expression_requires_branch_selection(client: TestClient) -> None:
     body = analyze(client, "MIT OR Apache-2.0", {"action": "use", "distribution": False})
     assert body["outcome"] == "Insufficient information"
     assert "selected_branch" in body["missing_facts"]
+
+
+def test_and_expression_abstains_not_first_license(client: TestClient) -> None:
+    body = analyze(
+        client,
+        "MIT AND GPL-2.0-only",
+        {"action": "use", "distribution": False},
+    )
+    assert body["outcome"] in {"Insufficient information", "Requires legal review"}
+    assert body["rule_id"] is None
+
+
+def test_with_expression_abstains_not_first_license(client: TestClient) -> None:
+    body = analyze(
+        client,
+        "MIT WITH Classpath-exception-2.0",
+        {"action": "use", "distribution": False},
+    )
+    assert body["outcome"] in {"Insufficient information", "Requires legal review"}
+    assert body["rule_id"] is None
+
+
+def test_grouped_or_requires_branch_not_collapse(client: TestClient) -> None:
+    body = analyze(
+        client,
+        "(MIT OR Apache-2.0)",
+        {"action": "use", "distribution": False, "selected_branch": "MIT"},
+    )
+    assert body["outcome"] == "Likely permitted under stated assumptions"
+    assert body["rule_id"] == "mit-internal-use"
+
+
+def test_compound_or_abstains(client: TestClient) -> None:
+    body = analyze(
+        client,
+        "MIT OR (Apache-2.0 OR GPL-2.0-only)",
+        {"action": "use", "distribution": False},
+    )
+    assert body["outcome"] in {"Insufficient information", "Requires legal review"}
+    assert body["rule_id"] is None
+
+
+def test_or_branch_compared_canonically(client: TestClient) -> None:
+    # The deprecated branch GPL-2.0 canonicalizes to GPL-2.0-only; selecting
+    # GPL-2.0-only must not be rejected as "not a branch". GPL is still outside
+    # the MVP rule set, so the answer must abstain rather than claim permission.
+    body = analyze(
+        client,
+        "GPL-2.0 OR MIT",
+        {"action": "use", "distribution": False, "selected_branch": "GPL-2.0-only"},
+    )
+    assert body["outcome"] in {"Insufficient information", "Requires legal review"}
+    assert body["rule_id"] is None
+
+
+def test_contradictory_use_with_distribution_abstains(client: TestClient) -> None:
+    body = analyze(
+        client,
+        "MIT",
+        {
+            "action": "use",
+            "distribution": True,
+            "distribution_form": "source",
+            "recipient": "public",
+            "modified": False,
+        },
+    )
+    assert body["outcome"] in {"Insufficient information", "Requires legal review"}
+
+
+def test_link_with_outbound_license_abstains(client: TestClient) -> None:
+    body = analyze(
+        client,
+        "MIT",
+        {"action": "link", "distribution": False, "outbound_license": "MIT"},
+    )
+    assert body["outcome"] in {"Insufficient information", "Requires legal review"}
+    assert body["rule_id"] is None
+
+
+def test_sublicense_with_outbound_license_abstains(client: TestClient) -> None:
+    body = analyze(
+        client,
+        "MIT",
+        {
+            "action": "sublicense",
+            "distribution": True,
+            "distribution_form": "source",
+            "recipient": "public",
+            "modified": False,
+            "outbound_license": "MIT",
+        },
+    )
+    assert body["outcome"] in {"Insufficient information", "Requires legal review"}
+    assert body["rule_id"] is None
 
 
 def test_or_expression_with_selected_branch_evaluates_that_branch(client: TestClient) -> None:
@@ -157,3 +261,122 @@ def test_ineligible_rule_cannot_support_conclusion() -> None:
     assert not is_eligible(draft)
     assert not is_eligible(expired)
     assert is_eligible(reviewed)
+
+
+def test_unsupported_or_set_abstains_even_with_supported_branch(
+    client: TestClient,
+) -> None:
+    body = analyze(
+        client,
+        "MIT OR GPL-3.0-only",
+        {"action": "use", "distribution": False, "selected_branch": "MIT"},
+    )
+    assert body["outcome"] == "Requires legal review"
+    assert body["rule_id"] is None
+
+
+def test_three_way_or_expression_abstains(client: TestClient) -> None:
+    body = analyze(
+        client,
+        "MIT OR Apache-2.0 OR GPL-3.0-only",
+        {"action": "use", "distribution": False, "selected_branch": "MIT"},
+    )
+    assert body["outcome"] == "Requires legal review"
+    assert body["rule_id"] is None
+
+
+def test_grouped_or_branch_evaluates_like_flat_or(client: TestClient) -> None:
+    body = analyze(
+        client,
+        "(MIT) OR Apache-2.0",
+        {"action": "use", "distribution": False, "selected_branch": "MIT"},
+    )
+    assert body["outcome"] == "Likely permitted under stated assumptions"
+    assert body["rule_id"] == "mit-internal-use"
+
+
+def test_modify_action_abstains(client: TestClient) -> None:
+    body = analyze(client, "MIT", {"action": "modify", "distribution": False})
+    assert body["outcome"] == "Requires legal review"
+    assert body["rule_id"] is None
+
+
+def test_aggregate_action_abstains(client: TestClient) -> None:
+    body = analyze(
+        client,
+        "MIT",
+        {
+            "action": "aggregate",
+            "distribution": True,
+            "distribution_form": "source",
+            "recipient": "public",
+            "modified": False,
+            "outbound_license": "MIT",
+            "license_file_present": True,
+            "copyright_notice_present": True,
+            "notice_file_present": False,
+        },
+    )
+    assert body["outcome"] == "Requires legal review"
+    assert body["rule_id"] is None
+
+
+def test_outbound_license_abstains_even_for_redistribute(client: TestClient) -> None:
+    body = analyze(
+        client,
+        "MIT",
+        {
+            "action": "redistribute",
+            "distribution": True,
+            "distribution_form": "source",
+            "recipient": "public",
+            "modified": False,
+            "outbound_license": "MIT",
+            "license_file_present": True,
+            "copyright_notice_present": True,
+            "notice_file_present": False,
+        },
+    )
+    assert body["outcome"] == "Requires legal review"
+    assert body["rule_id"] is None
+
+
+def test_permission_claim_is_cited_in_response(client: TestClient) -> None:
+    body = analyze(client, "MIT", {"action": "use", "distribution": False})
+    permission = body["permission"]
+    assert permission is not None
+    assert "Permission to use MIT" in permission["text"]
+    assert permission["citations"], "permission claim must carry a citation"
+    assert permission["citations"][0]["source_id"].startswith("spdx:MIT")
+
+
+def test_rule_version_and_content_hash_are_exposed(client: TestClient) -> None:
+    body = analyze(client, "MIT", {"action": "use", "distribution": False})
+    rule = body["rule"]
+    assert rule is not None
+    assert rule["rule_id"] == "mit-internal-use"
+    assert rule["content_hash"]
+    assert body["rule_id"] == "mit-internal-use"
+
+
+def test_deprecated_identifier_canonicalizes_with_warning(client: TestClient) -> None:
+    body = analyze(client, "GPL-2.0", {"action": "use", "distribution": False})
+    assert body["canonical"] == "GPL-2.0-only"
+    assert any("deprecated" in warning for warning in body["warnings"])
+    assert body["outcome"] == "Requires legal review"
+
+
+def test_question_does_not_change_deterministic_result(client: TestClient) -> None:
+    base = analyze(client, "MIT", {"action": "use", "distribution": False})
+    with_question = client.post(
+        "/api/v1/analyses",
+        json={
+            "expression": "MIT",
+            "facts": {"action": "use", "distribution": False},
+            "question": "Can we use this internally without distributing it?",
+        },
+    ).json()
+    assert with_question["outcome"] == base["outcome"]
+    assert with_question["obligations"] == base["obligations"]
+    assert with_question["rule_id"] == base["rule_id"]
+    assert with_question["permission"] == base["permission"]

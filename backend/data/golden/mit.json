@@ -6,24 +6,42 @@
       "description": "MIT component used internally, no distribution outside the organization.",
       "request": {
         "expression": "MIT",
-        "facts": { "action": "use", "distribution": false }
+        "facts": {
+          "action": "use",
+          "distribution": false
+        }
       },
       "expect": {
         "outcome": "Likely permitted under stated assumptions",
-        "must_abstain": false
+        "must_abstain": false,
+        "expected_permission": {
+          "text": "Permission to use MIT under the stated scenario",
+          "source_id": "spdx:MIT@3.24.0",
+          "span_index": 2,
+          "entailing": [
+            "permission is hereby granted",
+            "without restriction"
+          ]
+        }
       }
     },
     {
       "case_id": "mit-internal-modify-002",
       "category": "mit_supported",
-      "description": "MIT component modified but never distributed.",
+      "description": "MIT component modified but never distributed is outside the reviewed action set.",
       "request": {
         "expression": "MIT",
-        "facts": { "action": "modify", "distribution": false }
+        "facts": {
+          "action": "modify",
+          "distribution": false
+        }
       },
       "expect": {
-        "outcome": "Likely permitted under stated assumptions",
-        "must_abstain": false
+        "must_abstain": true,
+        "forbidden_outcomes": [
+          "Likely permitted under stated assumptions",
+          "Permitted with listed obligations"
+        ]
       }
     },
     {
@@ -37,15 +55,33 @@
           "distribution": true,
           "distribution_form": "source",
           "recipient": "public",
-          "modified": false
+          "modified": false,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": false
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
-          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+          {
+            "text": "Include the MIT license text",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "included",
+              "copies"
+            ]
+          },
+          {
+            "text": "Retain the original copyright notice",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "copyright notice"
+            ]
+          }
         ]
       }
     },
@@ -60,15 +96,33 @@
           "distribution": true,
           "distribution_form": "source",
           "recipient": "employees",
-          "modified": false
+          "modified": false,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": false
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
-          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+          {
+            "text": "Include the MIT license text",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "included",
+              "copies"
+            ]
+          },
+          {
+            "text": "Retain the original copyright notice",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "copyright notice"
+            ]
+          }
         ]
       }
     },
@@ -83,15 +137,33 @@
           "distribution": true,
           "distribution_form": "binary",
           "recipient": "customers",
-          "modified": false
+          "modified": false,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": false
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
-          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+          {
+            "text": "Include the MIT license text",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "included",
+              "copies"
+            ]
+          },
+          {
+            "text": "Retain the original copyright notice",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "copyright notice"
+            ]
+          }
         ]
       }
     },
@@ -106,15 +178,33 @@
           "distribution": true,
           "distribution_form": "binary",
           "recipient": "contractors",
-          "modified": false
+          "modified": false,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": false
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
-          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+          {
+            "text": "Include the MIT license text",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "included",
+              "copies"
+            ]
+          },
+          {
+            "text": "Retain the original copyright notice",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "copyright notice"
+            ]
+          }
         ]
       }
     },
@@ -129,15 +219,33 @@
           "distribution": true,
           "distribution_form": "source",
           "recipient": "public",
-          "modified": true
+          "modified": true,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": false
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
-          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+          {
+            "text": "Include the MIT license text",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "included",
+              "copies"
+            ]
+          },
+          {
+            "text": "Retain the original copyright notice",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "copyright notice"
+            ]
+          }
         ]
       }
     },
@@ -152,15 +260,33 @@
           "distribution": true,
           "distribution_form": "source",
           "recipient": "customers",
-          "modified": true
+          "modified": true,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": false
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
-          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+          {
+            "text": "Include the MIT license text",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "included",
+              "copies"
+            ]
+          },
+          {
+            "text": "Retain the original copyright notice",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "copyright notice"
+            ]
+          }
         ]
       }
     },
@@ -175,15 +301,33 @@
           "distribution": true,
           "distribution_form": "binary",
           "recipient": "public",
-          "modified": true
+          "modified": true,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": false
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
-          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+          {
+            "text": "Include the MIT license text",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "included",
+              "copies"
+            ]
+          },
+          {
+            "text": "Retain the original copyright notice",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "copyright notice"
+            ]
+          }
         ]
       }
     },
@@ -198,15 +342,33 @@
           "distribution": true,
           "distribution_form": "binary",
           "recipient": "contractors",
-          "modified": true
+          "modified": true,
+          "license_file_present": true,
+          "copyright_notice_present": true,
+          "notice_file_present": false
         }
       },
       "expect": {
         "outcome": "Permitted with listed obligations",
         "must_abstain": false,
         "expected_claims": [
-          { "text": "Include the MIT license text", "source_id": "spdx:MIT@3.24.0", "span_index": 2 },
-          { "text": "Retain the original copyright notice", "source_id": "spdx:MIT@3.24.0", "span_index": 3 }
+          {
+            "text": "Include the MIT license text",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "included",
+              "copies"
+            ]
+          },
+          {
+            "text": "Retain the original copyright notice",
+            "source_id": "spdx:MIT@3.24.0",
+            "span_index": 3,
+            "entailing": [
+              "copyright notice"
+            ]
+          }
         ]
       }
     }

@@ -20,13 +20,30 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from oss_license_guide.api.app import create_app
+from oss_license_guide.citations.resolver import parse_source_id
+from oss_license_guide.sources import load_catalog
 
 GOLDEN_DIR = Path(__file__).resolve().parents[2] / "data" / "golden"
+
+# The active catalog is used by the entailment check to verify a cited span's
+# text actually supports the claim, independent of the fixture's own assertion.
+_CATALOG = load_catalog()
 
 ABSTENTION_OUTCOMES = {"Insufficient information", "Requires legal review"}
 PERMISSION_OUTCOMES = {
     "Likely permitted under stated assumptions",
     "Permitted with listed obligations",
+}
+
+# Maintainer-reviewed default entailment criteria for the MVP source spans.
+# When a golden expectation omits an explicit ``entailing`` keyword list, these
+# keywords must still appear in the cited span's actual text, so Apache claims
+# are scored against span content rather than fixture identity alone.
+_DEFAULT_ENTAILING: dict[tuple[str, int], list[str]] = {
+    ("spdx:Apache-2.0@3.24.0", 16): ["copy of this license", "give any other recipients"],
+    ("spdx:Apache-2.0@3.24.0", 17): ["modified files", "changed the files"],
+    ("spdx:Apache-2.0@3.24.0", 18): ["retain", "attribution"],
+    ("spdx:Apache-2.0@3.24.0", 19): ["notice", "readable copy"],
 }
 
 
@@ -37,6 +54,7 @@ class GoldenExpect:
     outcome: str | None = None
     required_citations: list[tuple[str, int]] = field(default_factory=list)
     expected_claims: list[dict] = field(default_factory=list)
+    expected_permission: dict | None = None
     obligations_include: list[str] = field(default_factory=list)
     must_abstain: bool = False
     mandatory_escalation: bool = False
@@ -103,6 +121,7 @@ def _parse_case(item: dict, category: str) -> GoldenCase:
             outcome=expect.get("outcome"),
             required_citations=required_citations,
             expected_claims=expect.get("expected_claims", []),
+            expected_permission=expect.get("expected_permission"),
             obligations_include=expect.get("obligations_include", []),
             must_abstain=bool(expect.get("must_abstain", False)),
             mandatory_escalation=bool(expect.get("mandatory_escalation", False)),
@@ -146,15 +165,28 @@ def _score(case: GoldenCase, actual: dict, actual_citations: set[tuple[str, int]
     expected_citations = set(case.expect.required_citations)
     for claim in case.expect.expected_claims:
         expected_citations.add((claim["source_id"], int(claim["span_index"])))
+    if case.expect.expected_permission:
+        expected_citations.add(
+            (
+                case.expect.expected_permission["source_id"],
+                int(case.expect.expected_permission["span_index"]),
+            )
+        )
     coverage_total = len(expected_citations)
     coverage_hits = len(expected_citations & actual_citations) if coverage_total else 0
 
-    entailment_total = len(case.expect.expected_claims)
+    entailment_total = len(case.expect.expected_claims) + (
+        1 if case.expect.expected_permission else 0
+    )
     entailment_hits = sum(
         1
         for claim in case.expect.expected_claims
-        if _claim_supported(actual, claim)
+        if _claim_supported(actual, claim, _CATALOG)
     )
+    if case.expect.expected_permission and _permission_supported(
+        actual, case.expect.expected_permission, _CATALOG
+    ):
+        entailment_hits += 1
 
     context_total = len(case.expect.required_missing_facts)
     actual_missing = set(actual.get("missing_facts", []))
@@ -203,9 +235,12 @@ def _score(case: GoldenCase, actual: dict, actual_citations: set[tuple[str, int]
         if not any(required.lower() in text.lower() for text in texts):
             severe_reasons.append(f"required obligation absent: {required!r}")
 
-    # Mandatory escalation: the review-guidance must be present when required.
-    if case.expect.mandatory_escalation and not actual.get("escalation"):
-        severe_reasons.append("mandatory escalation missing")
+    # Mandatory escalation: the review guidance must be escalation-positive, so
+    # a non-empty generic string (including the non-escalation wording) fails.
+    if case.expect.mandatory_escalation:
+        esc = (actual.get("escalation") or "").lower()
+        if "legal review" not in esc or "recommend" not in esc:
+            severe_reasons.append("mandatory escalation missing or not escalation-positive")
 
     return CaseResult(
         case_id=case.case_id,
@@ -223,8 +258,14 @@ def _score(case: GoldenCase, actual: dict, actual_citations: set[tuple[str, int]
     )
 
 
-def _claim_supported(actual: dict, claim: dict) -> bool:
-    """Return True if an obligation matching ``claim`` cites its required span."""
+def _claim_supported(actual: dict, claim: dict, catalog) -> bool:
+    """Return True if an obligation matching ``claim`` cites its required span.
+
+    When the fixture supplies ``entailing`` keywords, the cited span's actual
+    text must also contain every keyword, so a non-entailing span (for example,
+    a permission-grant span cited for an inclusion obligation) fails even if it
+    happens to be the fixture's expected span.
+    """
     target_span = (claim["source_id"], int(claim["span_index"]))
     needle = claim["text"].lower()
     for obligation in actual.get("obligations", []):
@@ -235,9 +276,58 @@ def _claim_supported(actual: dict, claim: dict) -> bool:
             (citation["source_id"], int(citation["span_index"]))
             for citation in obligation.get("citations", [])
         }
-        if target_span in citations:
-            return True
+        if target_span not in citations:
+            continue
+        entailing = claim.get("entailing") or _DEFAULT_ENTAILING.get(target_span)
+        if entailing:
+            span_text = _span_text(catalog, claim["source_id"], int(claim["span_index"]))
+            lowered = span_text.lower()
+            if not all(keyword.lower() in lowered for keyword in entailing):
+                return False
+        return True
     return False
+
+
+def _permission_supported(actual: dict, permission: dict, catalog) -> bool:
+    """Return True if the API permission claim cites its required span.
+
+    Mirrors ``_claim_supported`` for the permission conclusion: the cited
+    span's actual text must contain every ``entailing`` keyword, so a
+    non-entailing span fails even if it happens to be the expected span.
+    """
+    target_span = (permission["source_id"], int(permission["span_index"]))
+    needle = permission.get("text", "").lower()
+    claim = actual.get("permission")
+    if not isinstance(claim, dict):
+        return False
+    text = claim.get("text", "").lower()
+    if needle and needle not in text:
+        return False
+    citations = {
+        (citation["source_id"], int(citation["span_index"]))
+        for citation in claim.get("citations", [])
+    }
+    if target_span not in citations:
+        return False
+    entailing = permission.get("entailing")
+    if entailing:
+        span_text = _span_text(catalog, permission["source_id"], int(permission["span_index"]))
+        lowered = span_text.lower()
+        if not all(keyword.lower() in lowered for keyword in entailing):
+            return False
+    return True
+
+
+def _span_text(catalog, source_id: str, span_index: int) -> str:
+    """Return the catalog text for a source span, or '' if unavailable."""
+    identifier, _version = parse_source_id(source_id)
+    record = catalog.lookup(identifier)
+    if record is None or record.text is None:
+        return ""
+    for paragraph in record.paragraphs:
+        if paragraph.index == span_index:
+            return record.text[paragraph.start : paragraph.end]
+    return ""
 
 
 def _collect_citations(actual: dict) -> set[tuple[str, int]]:
