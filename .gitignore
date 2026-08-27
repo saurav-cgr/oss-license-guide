@@ -1,4 +1,5 @@
 /docs/plan/
+/.agents/
 
 # Secrets and local configuration
 .env
