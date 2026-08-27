@@ -16,7 +16,7 @@ export function AnalysisForm({ client, state, onRun }: AnalysisFormProps) {
   const [question, setQuestion] = useState("");
   const [facts, setFacts] = useState<FactsInput>({});
   const [provider, setProvider] = useState<ProviderId>("none");
-  const [model, setModel] = useState("gemini-2.0-flash");
+  const [model, setModel] = useState("gemini-3.5-flash-lite");
   const [apiKey, setApiKey] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
 

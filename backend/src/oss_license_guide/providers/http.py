@@ -85,6 +85,11 @@ def post_json(
     server-controlled ``url``.
     """
     data = json.dumps(payload).encode("utf-8")
+    # A JSON body requires an explicit JSON content type. urllib would otherwise
+    # default to application/x-www-form-urlencoded, which provider APIs reject
+    # with a 400 "Invalid JSON payload" error.
+    headers = dict(headers)
+    headers.setdefault("Content-Type", "application/json")
     request = urllib.request.Request(url, data=data, headers=headers, method="POST")
     opener = urllib.request.build_opener(_SameOriginRedirectHandler())
 

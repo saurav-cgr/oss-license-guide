@@ -103,7 +103,7 @@ type FetchStub = ReturnType<typeof vi.fn>;
 
 const PROVIDERS = {
   providers: [
-    { id: "gemini", models: ["gemini-2.0-flash"] },
+    { id: "gemini", models: ["gemini-3.5-flash-lite"] },
     { id: "openai", models: ["gpt-4o-mini"] },
   ],
 };
@@ -267,7 +267,7 @@ describe("analysis experience", () => {
       const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
       if (url.endsWith("/api/v1/health")) return okJson(HEALTH);
       if (url.endsWith("/api/v1/providers"))
-        return okJson({ providers: [{ id: "gemini", models: ["gemini-2.0-flash"] }] });
+        return okJson({ providers: [{ id: "gemini", models: ["gemini-3.5-flash-lite"] }] });
       if (url.endsWith("/api/v1/analyses")) return okJson(SAMPLE);
       return okJson({});
     });
@@ -337,7 +337,7 @@ describe("analysis experience", () => {
       ...SAMPLE,
       explanation: "The license permits use with attribution.",
       provider: "gemini",
-      model: "gemini-2.0-flash",
+      model: "gemini-3.5-flash-lite",
       provider_note: "Model explanation unavailable; deterministic result shown.",
     };
     vi.stubGlobal("fetch", stubFetch({ analyses: () => okJson(withExplanation) }));

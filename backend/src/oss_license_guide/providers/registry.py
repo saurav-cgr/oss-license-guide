@@ -20,7 +20,7 @@ from oss_license_guide.providers.protocol import (
 
 # Default model identifiers served to clients per provider.
 DEFAULT_MODELS: dict[str, list[str]] = {
-    "gemini": ["gemini-2.0-flash"],
+    "gemini": ["gemini-3.5-flash-lite"],
     "openai": ["gpt-4o-mini"],
 }
 

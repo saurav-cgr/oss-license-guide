@@ -64,7 +64,9 @@ def openai_ok(
     )
 
 
-def request_body(provider: str | None = "gemini", model: str | None = "gemini-2.0-flash") -> dict:
+def request_body(
+    provider: str | None = "gemini", model: str | None = "gemini-3.5-flash-lite"
+) -> dict:
     return {
         "expression": "MIT",
         "provider": provider,
@@ -92,7 +94,7 @@ def test_gemini_happy_path_returns_explanation(client: TestClient, monkeypatch) 
 
     response = client.post(
         "/api/v1/analyses",
-        json=request_body("gemini", "gemini-2.0-flash"),
+        json=request_body("gemini", "gemini-3.5-flash-lite"),
         headers={"X-Model-Key": "sk-user-key"},
     )
     body = response.json()
@@ -182,7 +184,7 @@ def test_arbitrary_base_url_is_rejected(client: TestClient, monkeypatch) -> None
 
     monkeypatch.setattr("oss_license_guide.providers.http.post_json", fake_post_json)
 
-    body = request_body("gemini", "gemini-2.0-flash")
+    body = request_body("gemini", "gemini-3.5-flash-lite")
     body["base_url"] = "https://evil.example.com"
     response = client.post(
         "/api/v1/analyses",
@@ -297,6 +299,54 @@ def test_claim_language_in_elaboration_is_dropped(client: TestClient, monkeypatc
     assert body["outcome"] == "Likely permitted under stated assumptions"
 
 
+def test_grounded_paraphrase_is_accepted(client: TestClient, monkeypatch) -> None:
+    """A paraphrase using only grounded words is shown as the explanation.
+
+    Regression for the verbatim-substring gate rejecting every natural
+    restatement from a real model, so the model explanation never rendered.
+    """
+    paraphrase = (
+        "Under the stated scenario, MIT is likely permitted with no obligations. "
+        "A different scenario fact could change this result."
+    )
+
+    def fake_post_json(url, headers, payload, timeout):
+        return gemini_ok(paraphrase)
+
+    monkeypatch.setattr("oss_license_guide.providers.http.post_json", fake_post_json)
+
+    response = client.post(
+        "/api/v1/analyses",
+        json=request_body("gemini"),
+        headers={"X-Model-Key": "sk-user-key"},
+    )
+    body = response.json()
+    assert paraphrase in body["explanation"]
+    assert body["provider_note"] == ""
+
+
+def test_ungrounded_concept_in_elaboration_is_dropped(
+    client: TestClient, monkeypatch
+) -> None:
+    """A word not grounded in the findings (patent) still fails validation."""
+    injected = "Under the stated scenario, MIT is likely permitted unless a patent applies."
+
+    def fake_post_json(url, headers, payload, timeout):
+        return gemini_ok(injected)
+
+    monkeypatch.setattr("oss_license_guide.providers.http.post_json", fake_post_json)
+
+    response = client.post(
+        "/api/v1/analyses",
+        json=request_body("gemini"),
+        headers={"X-Model-Key": "sk-user-key"},
+    )
+    body = response.json()
+    assert "patent" not in body["explanation"]
+    assert body["explanation"] == ""
+    assert body["provider_note"] != ""
+
+
 def test_authorization_header_is_sent_at_transport(monkeypatch) -> None:
     """The Authorization header must reach the wire, not be stripped.
 
@@ -340,6 +390,50 @@ def test_authorization_header_is_sent_at_transport(monkeypatch) -> None:
     assert captured["status"] == "called"
     assert captured["authorization"] == "Bearer sk-secret"
     assert captured["x_goog"] is None
+
+
+def test_json_content_type_sent_when_omitted(monkeypatch) -> None:
+    """post_json must send Content-Type: application/json for a JSON body.
+
+    Regression for the Gemini 400 "Invalid JSON payload received. Unknown
+    name..." bug: without an explicit JSON content type, urllib defaults to
+    application/x-www-form-urlencoded and provider APIs reject the body.
+    """
+    captured: dict[str, str] = {}
+    captured["status"] = "not-called"
+
+    import urllib.request
+
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self) -> bytes:
+            return b"{}"
+
+    class FakeOpener:
+        def open(self, request, timeout=None):
+            captured["content_type"] = request.get_header("Content-type")
+            captured["status"] = "called"
+            return FakeResponse()
+
+    monkeypatch.setattr(
+        urllib.request, "build_opener", lambda *args, **kwargs: FakeOpener()
+    )
+
+    post_json(
+        "https://example.test/v1beta/models/gemini:generateContent",
+        headers={"x-goog-api-key": "sk-secret"},
+        payload={"contents": [{"role": "user", "parts": [{"text": "hi"}]}]},
+        timeout=5.0,
+    )
+    assert captured["status"] == "called"
+    assert captured["content_type"] == "application/json"
 
 
 def test_arbitrary_model_id_is_rejected_without_network(

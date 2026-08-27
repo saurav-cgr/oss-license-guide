@@ -35,6 +35,8 @@ _SYSTEM_PROMPT = (
     "You are a cautious legal-information assistant. You restate already-approved "
     "structured findings. You never add obligations, permissions, change outcomes, "
     "create citations, or give legal advice. Answer only from the provided findings. "
+    "Restate using ONLY the exact terms already provided: do not paraphrase, "
+    "synonymize, reword, or add any word that is not present in the findings text. "
     "Output a single JSON object with exactly one field named \"elaboration\" "
     "containing a short plain-language restatement (2-3 sentences) of the outcome "
     "and any listed obligations. Do not introduce any requirement, prohibition, "
@@ -245,19 +247,84 @@ def _sentences(value: str) -> list[str]:
     return [part for part in re.split(r"(?<=[.!?])\s+", value.strip()) if part.strip()]
 
 
-def _derivable_from_findings(value: str, findings: ExplanationFindings) -> bool:
-    """Return True if every sentence is a fragment of the deterministic text.
+_FUNCTION_WORDS = frozenset(
+    {
+        # Articles, pronouns, prepositions, conjunctions, auxiliaries, and
+        # common connective or metadiscourse words that carry no claim meaning
+        # by themselves. Deliberately excludes negation and obligation words
+        # ("not", "no", "never", "without", "unless", "must", "require", ...)
+        # so a flipped or contradicted claim cannot sneak through the
+        # word-containment check.
+        "a", "an", "the", "and", "or", "but", "if", "then", "else",
+        "of", "to", "in", "on", "at", "by", "for", "with", "under",
+        "over", "as", "is", "are", "was", "were", "be", "been",
+        "being", "am", "it", "its", "this", "that", "these", "those",
+        "they", "their", "them", "there", "here", "from", "into", "about",
+        "any", "each", "such", "than", "when", "while", "which", "who",
+        "whom", "whose", "where", "whereas", "what", "why", "how",
+        "can", "could", "would", "should", "will", "shall",
+        "may", "might", "do", "does", "did", "has", "have", "had", "all",
+        "both", "more", "most", "other", "some", "so", "up", "down", "out",
+        "just", "also", "only", "still", "even", "however", "therefore",
+        "thus", "hence", "because", "since", "although", "though",
+        "until", "whether", "between", "among", "within", "beyond",
+        "outside", "inside", "per", "associated", "related", "regarding",
+        "concerning", "including", "includes", "specifically", "generally",
+        "particular", "particularly", "further", "additionally", "moreover",
+        "overall", "referred", "referring", "known", "called", "namely",
+        "rather", "essentially",
+    }
+)
 
-    A model sentence is accepted only when its normalized text is a contiguous
-    substring of the normalized deterministic explanation assembled from the
-    structured findings. This rejects any new permission, obligation, payment,
-    or liability wording the model might invent, regardless of phrasing.
+
+def _content_words(value: str) -> set[str]:
+    """Return the lowercased content words (non-function) in ``value``."""
+    return {
+        word
+        for word in re.findall(r"[a-z0-9']+", value.lower())
+        if word not in _FUNCTION_WORDS
+    }
+
+
+def _grounded_vocabulary(findings: ExplanationFindings) -> set[str]:
+    """Return the content words the model is allowed to restate.
+
+    The allowed vocabulary comes from the deterministic findings plus the fixed
+    app labels in the user prompt, excluding the user's own question (untrusted
+    input that must not widen the pool). Any word absent from this set is
+    treated as invented by the model and rejected.
     """
-    pool = _normalize(_assemble_deterministic(findings))
+    parts = [_assemble_deterministic(findings)]
+    parts.extend(findings.assumptions)
+    if findings.obligations:
+        parts.extend(obligation.get("text", "") for obligation in findings.obligations)
+    else:
+        parts.append("no obligations")
+    parts.extend(findings.what_could_change)
+    prompt = _user_prompt(findings)
+    question_marker = "User's question (for context only):"
+    if question_marker in prompt:
+        prompt = prompt.split(question_marker, 1)[0]
+    parts.append(prompt)
+    vocabulary: set[str] = set()
+    for part in parts:
+        vocabulary.update(_content_words(part))
+    return vocabulary
+
+
+def _derivable_from_findings(value: str, findings: ExplanationFindings) -> bool:
+    """Return True if every content word in ``value`` is grounded in findings.
+
+    A model sentence is accepted only when every non-function word in it also
+    appears in the deterministic findings. This lets the model restate the
+    grounded result in its own words while rejecting any new permission,
+    obligation, payment, liability, or other unsupported wording.
+    """
+    vocabulary = _grounded_vocabulary(findings)
     for sentence in _sentences(value):
-        normalized = _normalize(sentence.rstrip(".!?"))
-        if normalized and normalized not in pool:
-            return False
+        for word in _content_words(sentence):
+            if word not in vocabulary:
+                return False
     return True
 
 
@@ -276,8 +343,11 @@ def _repair_request(request: ProviderRequest, prior: str) -> ProviderRequest:
         detail = "the output was not parseable JSON"
     corrective = (
         f"\n\nYour previous response was rejected: {detail}. "
-        'Respond again with ONLY a JSON object: {"elaboration": "<2-3 sentence restatement>"}. '
-        "No other fields, no extra text, and do not introduce any requirement or obligation."
+        'Respond again with ONLY a JSON object: {"elaboration": "<2-3 sentence '
+        'restatement>"}. Use only the exact wording already provided in the '
+        'facts; do not paraphrase, synonymize, or add any new word. '
+        "No other fields, no extra text, and do not introduce any requirement "
+        "or obligation."
     )
     return ProviderRequest(
         provider=request.provider,
